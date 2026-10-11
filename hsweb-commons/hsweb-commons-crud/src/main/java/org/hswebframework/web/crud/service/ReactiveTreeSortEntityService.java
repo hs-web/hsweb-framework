@@ -258,23 +258,35 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
             data.setId(id);
             ReactiveTreeSortServiceHelper<E, K> helper = new ReactiveTreeSortServiceHelper<>(this);
             return helper.prepareUpdate(Flux.just(data))
-                .concatMap(node -> {
-                    E patch = helper.getUpdateData(node);
-                    if (patch != null) {
-                        if (helper.isNewNode(node)) {
-                            // 使用服务入口，让业务 ID、创建校验及实体事件参与原事务。
-                            return save(patch).map(SaveResult::getTotal);
+                .collectList()
+                .flatMap(nodes -> getRepository().updateById(id, helper.getUpdateData(data))
+                    .flatMap(updated -> {
+                        // 目标始终是 UPDATE；并发删除导致零修改时，不能新增目标或继续写 children。
+                        if (updated == 0) {
+                            return Mono.just(0);
                         }
-                        // 不把完整快照回写，避免覆盖其他事务修改的独立业务字段。
-                        return getRepository().updateById(node.getId(), patch);
-                    }
-                    return getRepository().createUpdate()
-                        .set("path", node.getPath())
-                        .set("level", node.getLevel())
-                        .where("id", node.getId())
-                        .execute();
-                })
-                .reduce(Math::addExact);
+                        return Flux.fromIterable(nodes)
+                            .filter(node -> !Objects.equals(id, node.getId()))
+                            .concatMap(node -> {
+                                E patch = helper.getUpdateData(node);
+                                if (patch != null) {
+                                    if (helper.isNewNode(node)) {
+                                        // 保留业务 save 扩展，再按实际持久路径维护尚未写入的后代。
+                                        return save(patch).flatMap(result -> getRepository().findById(patch.getId())
+                                            .doOnNext(helper::updateSavedNodePath)
+                                            .thenReturn(result.getTotal()));
+                                    }
+                                    // 不把完整快照回写，避免覆盖其他事务修改的独立业务字段。
+                                    return getRepository().updateById(node.getId(), patch);
+                                }
+                                return getRepository().createUpdate()
+                                    .set("path", node.getPath())
+                                    .set("level", node.getLevel())
+                                    .where("id", node.getId())
+                                    .execute();
+                            })
+                            .reduce(updated, Math::addExact);
+                    }));
         })).defaultIfEmpty(0);
         return TransactionUtils.tryRunInTransaction(operation, new DefaultTransactionDefinition());
     }

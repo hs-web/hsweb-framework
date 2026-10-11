@@ -53,6 +53,57 @@ public class ConcurrentParentPatchRegressionTest {
         verifyNamePatchAfterParentMove(true);
     }
 
+    @Test
+    public void monoUpdateCannotReinsertTargetDeletedAfterItsInitialRead() {
+        verifyUpdateAfterTargetDeletion(false);
+    }
+
+    @Test
+    public void entityUpdateCannotReinsertTargetDeletedAfterItsInitialRead() {
+        verifyUpdateAfterTargetDeletion(true);
+    }
+
+    private void verifyUpdateAfterTargetDeletion(boolean entityOverload) {
+        TestTreeSortEntity target = node("target-before-delete");
+        service.save(target).as(StepVerifier::create).expectNextCount(1).verifyComplete();
+        Gate gate = new Gate(target.getId(), null, connectionFactory);
+        service.installGate(gate);
+        DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+        definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        definition.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
+        TransactionalOperator transactions = TransactionalOperator.create(manager, definition);
+
+        TestTreeSortEntity patch = node("target-after-delete-" + target.getId());
+        TestTreeSortEntity child = node("deleted-target-child-" + target.getId());
+        patch.setChildren(List.of(child));
+        AtomicReference<Integer> updated = new AtomicReference<>();
+        Mono<Void> update = transactions.transactional(entityOverload ? service.updateById(target.getId(), patch)
+            : service.updateById(target.getId(), Mono.just(patch)))
+            .contextWrite(context -> context.put(PATCH, true)).doOnNext(updated::set).then();
+        Mono<Void> deletion = gate.read.asMono().flatMap(updateConnection -> transactions.transactional(
+            TransactionSynchronizationManager.forCurrentTransaction().flatMap(tx -> {
+                assertTrue(tx.isActualTransactionActive());
+                Object deleteConnection = tx.getResource(connectionFactory);
+                assertNotNull(deleteConnection);
+                assertNotSame("deletion and update require real independent connections", updateConnection, deleteConnection);
+                return service.deleteById(target.getId()).doOnNext(deleted -> assertEquals(Integer.valueOf(1), deleted));
+            })))
+            // 放行发生在删除事务正式完成之后，第二次图读取必须看到目标已不存在。
+            .then(Mono.fromRunnable(() -> gate.release.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST)));
+        try {
+            Mono.when(update, deletion).as(StepVerifier::create).expectComplete().verify(Duration.ofSeconds(10));
+            service.getRepository().createQuery().in("name", List.of(patch.getName(), child.getName())).count()
+                .as(StepVerifier::create).assertNext(count -> {
+                    assertEquals("update-only target must stay absent; update count=" + updated.get(), Integer.valueOf(0), count);
+                    assertEquals(Integer.valueOf(0), updated.get());
+                }).verifyComplete();
+            service.getRepository().findById(target.getId()).as(StepVerifier::create).verifyComplete();
+        } finally {
+            gate.release.tryEmitEmpty();
+            service.installGate(null);
+        }
+    }
+
     private void verifyNamePatchAfterParentMove(boolean entityOverload) {
         TestTreeSortEntity parentA = node("parent-a");
         TestTreeSortEntity parentB = node("parent-b");

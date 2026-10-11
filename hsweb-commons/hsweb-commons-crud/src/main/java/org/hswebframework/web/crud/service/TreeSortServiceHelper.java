@@ -209,6 +209,14 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
         return !oldData.containsKey(node.getId());
     }
 
+    /** 新节点的业务 save 重新准备路径后，只同步尚待写入后代的树字段。 */
+    void updateSavedNodePath(E saved) {
+        E prepared = allData.get(saved.getId());
+        prepared.setPath(saved.getPath());
+        prepared.setLevel(saved.getLevel());
+        refactorChildPath(saved.getId(), saved.getPath(), this::refactor);
+    }
+
     /** 当前完整保存明确移根，且原持久化节点具有父级。 */
     protected boolean isMovingToRoot(E node) {
         E previous = oldData.get(node.getId());
@@ -356,12 +364,8 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
         //新增节点
         else if (parentId != null) {
             if (oldParent != null) {
-                String parentPath = oldParent.getPath() + "-";
-                // 新节点经过服务 save 扩展再次准备时，保留已与当前父级一致的直接子路径。
-                if (data.getPath() == null || !data.getPath().startsWith(parentPath)
-                    || data.getPath().indexOf('-', parentPath.length()) >= 0) {
-                    data.setPath(parentPath + RandomUtil.randomChar(4));
-                }
+                // 普通新增不能信任调用方传入的路径，即使形状符合当前父级也必须重新分配。
+                data.setPath(oldParent.getPath() + "-" + RandomUtil.randomChar(4));
             }
         }
     }
