@@ -14,6 +14,10 @@ public class ReactiveTreeSortServiceHelper<E extends TreeSortSupportEntity<PK>, 
         this.service = service;
     }
 
+    Flux<E> prepareUpdate(Flux<E> source) {
+        return prepare(source, true);
+    }
+
     @Override
     protected IDGenerator<PK> getIdGenerator() {
         return service.getIDGenerator();

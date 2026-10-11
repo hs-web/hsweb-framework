@@ -14,12 +14,12 @@ import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.system.authorization.api.enums.DimensionUserFeature;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import java.nio.charset.StandardCharsets;
 import java.sql.JDBCType;
 
 @Getter
@@ -82,13 +82,15 @@ public class DimensionUserEntity extends GenericEntity<String> {
     @Schema(description = "关联时间", accessMode = Schema.AccessMode.READ_ONLY)
     private Long relationTime;
 
+    /** 保留公开 ID；新成员使用 UTF-8 字节长度前缀，避免业务字段中的分隔字符产生歧义。 */
     public void generateId() {
         if (ObjectUtils.isEmpty(getId())) {
-            String id = DigestUtils
-                    .md5DigestAsHex(String.format("%s-%s-%s",
-                                                  dimensionTypeId,
-                                                  dimensionId, userId).getBytes());
-            setId(id);
+            StringBuilder key = new StringBuilder();
+            for (String value : new String[]{dimensionTypeId, dimensionId, userId}) {
+                String part = String.valueOf(value);
+                key.append(part.getBytes(StandardCharsets.UTF_8).length).append(':').append(part);
+            }
+            setId(DigestUtils.md5DigestAsHex(key.toString().getBytes(StandardCharsets.UTF_8)));
         }
     }
 

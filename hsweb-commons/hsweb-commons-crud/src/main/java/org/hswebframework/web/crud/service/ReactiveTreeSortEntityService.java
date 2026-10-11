@@ -7,7 +7,6 @@ import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.ezorm.rdb.operator.dml.Terms;
 import org.hswebframework.web.api.crud.entity.*;
 import org.hswebframework.web.id.IDGenerator;
-import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.crud.utils.TransactionUtils;
 import org.reactivestreams.Publisher;
 import org.springframework.transaction.annotation.Transactional;
@@ -248,28 +247,27 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     }
 
     /**
-     * 部分更新忽略 null，完整节点仅用于树准备；业务列仍按调用方提供的字段更新。
-     * 更新使用 ORM Modify 事件及其完整 before/after 状态；显式移根使用完整 save 或维护树生命周期的 DSL。
+     * 部分更新忽略 null；显式 children 参与修改和新增，遗漏后代仅维护树字段。
+     * 已有节点使用 ORM Modify 完整 before/after 事件，新节点经过服务 save 保留业务扩展。
+     * 显式移根使用完整 save 或维护树生命周期的 DSL。
      */
     @Override
     @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> updateById(K id, Mono<E> entityPublisher) {
         Mono<Integer> operation = entityPublisher.flatMap(data -> findById(id).flatMap(existing -> {
-            Map<String, Object> updates = FastBeanCopier.copy(data, new LinkedHashMap<>());
-            updates.values().removeIf(Objects::isNull);
-            updates.remove("id");
-            FastBeanCopier.copy(updates, existing);
-            existing.setId(id);
+            data.setId(id);
             ReactiveTreeSortServiceHelper<E, K> helper = new ReactiveTreeSortServiceHelper<>(this);
-            return helper.prepare(Flux.just(existing))
+            return helper.prepareUpdate(Flux.just(data))
                 .concatMap(node -> {
-                    if (Objects.equals(id, node.getId())) {
-                        // 不把完整快照回写到数据库，避免覆盖其他事务修改的独立业务字段。
-                        data.setPath(node.getPath());
-                        data.setLevel(node.getLevel());
-                        return getRepository().updateById(id, data);
+                    E patch = helper.getUpdateData(node);
+                    if (patch != null) {
+                        if (helper.isNewNode(node)) {
+                            // 使用服务入口，让业务 ID、创建校验及实体事件参与原事务。
+                            return save(patch).map(SaveResult::getTotal);
+                        }
+                        // 不把完整快照回写，避免覆盖其他事务修改的独立业务字段。
+                        return getRepository().updateById(node.getId(), patch);
                     }
-                    // 未提供的后代仅同步树路径，不重写其业务状态或排序。
                     return getRepository().createUpdate()
                         .set("path", node.getPath())
                         .set("level", node.getLevel())

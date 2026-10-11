@@ -1,0 +1,328 @@
+package org.hswebframework.web.crud.service;
+
+import org.hswebframework.web.crud.TestApplication;
+import org.hswebframework.web.crud.entity.TestTreeSortEntity;
+import org.hswebframework.web.crud.web.reactive.ReactiveServiceSaveController;
+import org.hswebframework.web.exception.ValidationException;
+import org.hswebframework.web.id.IDGenerator;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestComponent;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.*;
+
+/** 显式嵌套节点保留修改和创建语义，自动展开的后代只维护树字段。 */
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = {TestApplication.class, TestTreeSortEntityService.class}, properties = {
+    "spring.r2dbc.generate-unique-name=true",
+    "spring.r2dbc.name=ExplicitTreeUpdateRegressionTest"
+})
+public class ExplicitTreeUpdateRegressionTest {
+    private static final Duration TIMEOUT = Duration.ofSeconds(10);
+
+    @Autowired
+    private TestTreeSortEntityService service;
+
+    @Test
+    public void monoPatchUpdatesExplicitExistingChildAndPreservesOmittedFields() {
+        verifyExistingChild(false);
+    }
+
+    @Test
+    public void entityPatchUpdatesExplicitExistingChildAndPreservesOmittedFields() {
+        verifyExistingChild(true);
+    }
+
+    @Test
+    public void monoPatchInsertsExplicitNewChild() {
+        verifyNewChild(false);
+    }
+
+    @Test
+    public void entityPatchInsertsExplicitNewChild() {
+        verifyNewChild(true);
+    }
+
+    @Test
+    public void monoNestedChildMovePreservesOmittedLeafBusinessState() {
+        verifyNestedChildMove(false);
+    }
+
+    @Test
+    public void entityNestedChildMovePreservesOmittedLeafBusinessState() {
+        verifyNestedChildMove(true);
+    }
+
+    @Test
+    public void monoNewChildValidationRollsBackTheWholePatch() {
+        verifyInvalidNewChild(false);
+    }
+
+    @Test
+    public void entityNewChildValidationRollsBackTheWholePatch() {
+        verifyInvalidNewChild(true);
+    }
+
+    @Test
+    public void monoNewParentKeepsExplicitExistingChildAndOmittedLeafPathsConsistent() {
+        verifyNewParentWithExistingChild(false);
+    }
+
+    @Test
+    public void entityNewParentKeepsExplicitExistingChildAndOmittedLeafPathsConsistent() {
+        verifyNewParentWithExistingChild(true);
+    }
+
+    @Test
+    public void publicPutPersistsBothExistingAndGeneratedIdChildren() {
+        TestTreeSortEntity root = node("root-before");
+        TestTreeSortEntity child = node("child-before");
+        child.setSortIndex(37L);
+        root.setChildren(List.of(child));
+        save(root);
+        TestTreeSortEntity patch = patch("root-after");
+        TestTreeSortEntity childPatch = patch("child-after");
+        childPatch.setId(child.getId());
+        TestTreeSortEntity added = patch("http-new-" + IDGenerator.MD5.generate());
+        added.setDefaultTest("new-business");
+        patch.setChildren(List.of(childPatch, added));
+        client().put().uri("/tree/{id}", root.getId()).contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(patch).exchange().expectStatus().isOk().expectBody(Boolean.class).isEqualTo(true);
+        stored(List.of(root.getId(), child.getId())).as(StepVerifier::create).assertNext(after -> {
+            assertEquals("root-after", after.get(root.getId()).getName());
+            assertEquals("child-after", after.get(child.getId()).getName());
+            assertEquals("business-before", after.get(child.getId()).getDefaultTest());
+            assertEquals(Long.valueOf(37), after.get(child.getId()).getSortIndex());
+        }).expectComplete().verify(TIMEOUT);
+        findNewChild(added.getName(), root.getId()).as(StepVerifier::create).assertNext(after -> {
+            assertNotNull(after.getId());
+            assertEquals("new-business", after.getDefaultTest());
+            assertTrue(after.getPath().startsWith(root.getPath() + "-"));
+            assertEquals(Integer.valueOf(2), after.getLevel());
+        }).expectComplete().verify(TIMEOUT);
+    }
+
+    @Test
+    public void publicPutRejectsInvalidNewChildAndRollsBackParent() {
+        TestTreeSortEntity root = node("root-before");
+        save(root);
+        TestTreeSortEntity patch = patch("root-after");
+        TestTreeSortEntity invalid = patch("http-invalid-" + IDGenerator.MD5.generate());
+        invalid.setDefaultTest("");
+        patch.setChildren(List.of(invalid));
+        // 与生产相同的 CreateGroup 约束先通过正式新增入口验证，HTTP 不替换事件校验。
+        service.insert(invalid).as(StepVerifier::create).expectError(ValidationException.class).verify(TIMEOUT);
+        client().put().uri("/tree/{id}", root.getId()).contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(patch).exchange().expectStatus().value(status -> assertTrue(status >= 400));
+        verifyRejectedPatch(root, invalid.getName());
+    }
+
+    @Test
+    public void missingTargetDoesNotCreateExplicitChildren() {
+        for (boolean entityOverload : List.of(false, true)) {
+            String missingId = IDGenerator.MD5.generate();
+            TestTreeSortEntity patch = patch("missing-target");
+            TestTreeSortEntity child = node("missing-child-" + IDGenerator.MD5.generate());
+            patch.setChildren(List.of(child));
+            update(missingId, patch, entityOverload).as(StepVerifier::create).expectNext(0).verifyComplete();
+            service.getRepository().createQuery().where("name", child.getName()).count()
+                .as(StepVerifier::create).expectNext(0).verifyComplete();
+        }
+    }
+
+    private void verifyExistingChild(boolean entityOverload) {
+        TestTreeSortEntity outer = node("outer");
+        TestTreeSortEntity root = node("root-before");
+        TestTreeSortEntity child = node("child-before");
+        child.setSortIndex(37L);
+        TestTreeSortEntity leaf = node("leaf-before");
+        leaf.setSortIndex(84L);
+        outer.setChildren(List.of(root));
+        root.setChildren(List.of(child));
+        child.setChildren(List.of(leaf));
+        save(outer);
+        TestTreeSortEntity patch = patch("root-after");
+        TestTreeSortEntity childPatch = patch("child-after");
+        childPatch.setId(child.getId());
+        patch.setChildren(List.of(childPatch));
+        update(root.getId(), patch, entityOverload).then(stored(List.of(root.getId(), child.getId(), leaf.getId())))
+            .as(StepVerifier::create).assertNext(after -> {
+                assertEquals("root-after", after.get(root.getId()).getName());
+                assertEquals(outer.getId(), after.get(root.getId()).getParentId());
+                assertEquals(root.getPath(), after.get(root.getId()).getPath());
+                TestTreeSortEntity storedChild = after.get(child.getId());
+                assertEquals("child-after", storedChild.getName());
+                assertEquals("business-before", storedChild.getDefaultTest());
+                assertEquals(root.getId(), storedChild.getParentId());
+                assertEquals(child.getPath(), storedChild.getPath());
+                assertEquals(child.getSortIndex(), storedChild.getSortIndex());
+                assertEquals("leaf-before", after.get(leaf.getId()).getName());
+                assertEquals(leaf.getPath(), after.get(leaf.getId()).getPath());
+                assertEquals(leaf.getSortIndex(), after.get(leaf.getId()).getSortIndex());
+            }).expectComplete().verify(TIMEOUT);
+    }
+
+    private void verifyNewChild(boolean entityOverload) {
+        TestTreeSortEntity root = node("root-before");
+        save(root);
+        TestTreeSortEntity patch = patch("root-after");
+        TestTreeSortEntity added = patch("new-child-" + IDGenerator.MD5.generate());
+        added.setDefaultTest("new-business");
+        patch.setChildren(List.of(added));
+        update(root.getId(), patch, entityOverload).then(findNewChild(added.getName(), root.getId()))
+            .as(StepVerifier::create).assertNext(after -> {
+                assertNotNull(after.getId());
+                assertEquals("new-business", after.getDefaultTest());
+                assertEquals(root.getId(), after.getParentId());
+                assertTrue(after.getPath().startsWith(root.getPath() + "-"));
+                assertEquals(Integer.valueOf(2), after.getLevel());
+            }).expectComplete().verify(TIMEOUT);
+    }
+
+    private void verifyNestedChildMove(boolean entityOverload) {
+        TestTreeSortEntity parentA = node("parent-a");
+        TestTreeSortEntity parentB = node("parent-b");
+        TestTreeSortEntity branch = node("branch-before");
+        branch.setSortIndex(37L);
+        TestTreeSortEntity leaf = node("leaf-before");
+        leaf.setSortIndex(84L);
+        parentA.setChildren(List.of(branch));
+        branch.setChildren(List.of(leaf));
+        service.save(List.of(parentA, parentB)).as(StepVerifier::create).expectNextCount(1).verifyComplete();
+        TestTreeSortEntity patch = patch("parent-b-after");
+        TestTreeSortEntity childPatch = patch("branch-after");
+        childPatch.setId(branch.getId());
+        patch.setChildren(List.of(childPatch));
+        update(parentB.getId(), patch, entityOverload).then(stored(List.of(branch.getId(), leaf.getId())))
+            .as(StepVerifier::create).assertNext(after -> {
+                TestTreeSortEntity moved = after.get(branch.getId());
+                assertEquals("branch-after", moved.getName());
+                assertEquals("business-before", moved.getDefaultTest());
+                assertEquals(parentB.getId(), moved.getParentId());
+                assertTrue(moved.getPath().startsWith(parentB.getPath() + "-"));
+                assertEquals(branch.getSortIndex(), moved.getSortIndex());
+                TestTreeSortEntity storedLeaf = after.get(leaf.getId());
+                assertEquals(branch.getId(), storedLeaf.getParentId());
+                assertTrue(storedLeaf.getPath().startsWith(moved.getPath() + "-"));
+                assertEquals(Integer.valueOf(3), storedLeaf.getLevel());
+                assertEquals("leaf-before", storedLeaf.getName());
+                assertEquals("business-before", storedLeaf.getDefaultTest());
+                assertEquals(leaf.getSortIndex(), storedLeaf.getSortIndex());
+            }).expectComplete().verify(TIMEOUT);
+    }
+
+    private void verifyNewParentWithExistingChild(boolean entityOverload) {
+        TestTreeSortEntity root = node("root-before");
+        TestTreeSortEntity branch = node("branch-before");
+        TestTreeSortEntity leaf = node("leaf-before");
+        root.setChildren(List.of(branch));
+        branch.setChildren(List.of(leaf));
+        save(root);
+        TestTreeSortEntity patch = patch("root-after");
+        TestTreeSortEntity newParent = patch("new-parent-" + IDGenerator.MD5.generate());
+        newParent.setDefaultTest("new-business");
+        TestTreeSortEntity branchPatch = patch("branch-after");
+        branchPatch.setId(branch.getId());
+        newParent.setChildren(List.of(branchPatch));
+        patch.setChildren(List.of(newParent));
+        update(root.getId(), patch, entityOverload).then(findNewChild(newParent.getName(), root.getId()))
+            .flatMap(parent -> stored(List.of(branch.getId(), leaf.getId())).map(after -> {
+                TestTreeSortEntity storedBranch = after.get(branch.getId());
+                TestTreeSortEntity storedLeaf = after.get(leaf.getId());
+                assertEquals(parent.getId(), storedBranch.getParentId());
+                assertEquals("branch-after", storedBranch.getName());
+                assertEquals("business-before", storedBranch.getDefaultTest());
+                assertTrue(storedBranch.getPath().startsWith(parent.getPath() + "-"));
+                assertEquals(Integer.valueOf(3), storedBranch.getLevel());
+                assertEquals(branch.getId(), storedLeaf.getParentId());
+                assertEquals("leaf-before", storedLeaf.getName());
+                assertTrue(storedLeaf.getPath().startsWith(storedBranch.getPath() + "-"));
+                assertEquals(Integer.valueOf(4), storedLeaf.getLevel());
+                return true;
+            })).as(StepVerifier::create).expectNext(true).expectComplete().verify(TIMEOUT);
+    }
+
+    private void verifyInvalidNewChild(boolean entityOverload) {
+        TestTreeSortEntity root = node("root-before");
+        save(root);
+        TestTreeSortEntity patch = patch("root-after");
+        TestTreeSortEntity invalid = patch("invalid-" + IDGenerator.MD5.generate());
+        invalid.setDefaultTest("");
+        patch.setChildren(List.of(invalid));
+        service.insert(invalid).as(StepVerifier::create).expectError(ValidationException.class).verify(TIMEOUT);
+        update(root.getId(), patch, entityOverload).as(StepVerifier::create)
+            .expectError(ValidationException.class).verify(TIMEOUT);
+        verifyRejectedPatch(root, invalid.getName());
+    }
+
+    private void verifyRejectedPatch(TestTreeSortEntity root, String invalidName) {
+        service.getRepository().findById(root.getId()).as(StepVerifier::create).assertNext(after -> {
+            assertEquals("root-before", after.getName());
+            assertEquals(root.getPath(), after.getPath());
+        }).expectComplete().verify(TIMEOUT);
+        service.getRepository().createQuery().where("name", invalidName).count()
+            .as(StepVerifier::create).expectNext(0).verifyComplete();
+    }
+
+    private Mono<Integer> update(String id, TestTreeSortEntity patch, boolean entityOverload) {
+        return entityOverload ? service.updateById(id, patch) : service.updateById(id, Mono.just(patch));
+    }
+
+    private Mono<Map<String, TestTreeSortEntity>> stored(List<String> ids) {
+        return service.getRepository().findById(ids).collectMap(TestTreeSortEntity::getId);
+    }
+
+    private Mono<TestTreeSortEntity> findNewChild(String name, String parentId) {
+        return service.getRepository().createQuery().where("name", name).and("parentId", parentId).fetchOne();
+    }
+
+    private void save(TestTreeSortEntity root) {
+        service.save(root).as(StepVerifier::create).expectNextCount(1).verifyComplete();
+    }
+
+    private WebTestClient client() {
+        return WebTestClient.bindToController(new TreeController(service)).build();
+    }
+
+    private static TestTreeSortEntity node(String name) {
+        TestTreeSortEntity node = patch(name);
+        node.setId(IDGenerator.MD5.generate());
+        node.setDefaultTest("business-before");
+        return node;
+    }
+
+    private static TestTreeSortEntity patch(String name) {
+        TestTreeSortEntity patch = new TestTreeSortEntity();
+        patch.setName(name);
+        return patch;
+    }
+
+    @TestComponent
+    @RestController
+    @RequestMapping("/tree")
+    public static class TreeController implements ReactiveServiceSaveController<TestTreeSortEntity, String> {
+        private final TestTreeSortEntityService service;
+
+        public TreeController(TestTreeSortEntityService service) {
+            this.service = service;
+        }
+
+        @Override
+        public TestTreeSortEntityService getService() {
+            return service;
+        }
+    }
+}

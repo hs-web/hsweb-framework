@@ -3,10 +3,13 @@ package org.hswebframework.web.crud.service;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.hswebframework.utils.RandomUtil;
+import org.hswebframework.web.api.crud.entity.EntityFactoryHolder;
 import org.hswebframework.web.api.crud.entity.TreeSortSupportEntity;
 import org.hswebframework.web.api.crud.entity.TreeSupportEntity;
+import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.id.IDGenerator;
+import org.springframework.beans.BeanUtils;
 import org.springframework.util.ObjectUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,6 +33,10 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
 
     protected final Map<PK, Map<PK, E>> childrenMapping = new LinkedHashMap<>();
 
+    private final Map<PK, E> updateData = new LinkedHashMap<>();
+
+    private final List<E> updateRoots = new ArrayList<>();
+
     protected abstract IDGenerator<PK> getIdGenerator();
 
     protected abstract void applyChildren(E parent, List<E> children);
@@ -42,8 +49,28 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
 
 
     public Flux<E> prepare(Flux<E> source) {
+        return prepare(source, false);
+    }
+
+    protected Flux<E> prepare(Flux<E> source, boolean partialUpdate) {
         Flux<E> cache = source
-            .flatMapIterable(e -> TreeSupportEntity.expandTree2List(e, getIdGenerator()))
+            .flatMapIterable(root -> {
+                Map<E, E> patches = partialUpdate ? copyUpdateInput(root) : Collections.emptyMap();
+                List<E> expanded = TreeSupportEntity.expandTree2List(root, getIdGenerator());
+                if (partialUpdate) {
+                    updateRoots.add(root);
+                    for (E node : expanded) {
+                        E patch = patches.get(node);
+                        patch.setId(node.getId());
+                        if (node != root) {
+                            // children 的嵌套关系本身就是显式父级意图。
+                            patch.setParentId(node.getParentId());
+                        }
+                        updateData.put(node.getId(), patch);
+                    }
+                }
+                return expanded;
+            })
             .collectList()
             .flatMapIterable(list -> {
 
@@ -64,7 +91,7 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
             })
             .cache();
 
-        return init(cache)
+        return init(cache, partialUpdate)
             .then(Mono.defer(this::checkParentId))
             .then(Mono.fromRunnable(this::checkCyclicDependency))
             .then(Mono.fromRunnable(this::refactorPath))
@@ -75,7 +102,29 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
                                        Comparator.nullsFirst(Comparator.naturalOrder())));
     }
 
-    private Mono<Void> init(Flux<E> source) {
+    @SuppressWarnings("unchecked")
+    private Map<E, E> copyUpdateInput(E root) {
+        Map<E, E> copies = new IdentityHashMap<>();
+        Queue<E> queue = new ArrayDeque<>();
+        queue.add(root);
+        for (E node = queue.poll(); node != null; node = queue.poll()) {
+            if (copies.containsKey(node)) {
+                continue;
+            }
+            Class<E> nodeType = (Class<E>) node.getClass();
+            E copy = EntityFactoryHolder.newInstance(
+                nodeType,
+                () -> BeanUtils.instantiateClass(nodeType));
+            FastBeanCopier.copy(node, copy);
+            copies.put(node, copy);
+            if (CollectionUtils.isNotEmpty(node.getChildren())) {
+                queue.addAll(node.<E>getChildren());
+            }
+        }
+        return copies;
+    }
+
+    private Mono<Void> init(Flux<E> source, boolean partialUpdate) {
         oldData = new LinkedHashMap<>();
         thisTime = new LinkedHashMap<>();
         allData = new LinkedHashMap<>();
@@ -105,6 +154,9 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
                     }
                 }
 
+                if (partialUpdate) {
+                    completeUpdateInput();
+                }
                 readyToSave.putAll(thisTime);
 
                 allData.putAll(includeChildren);
@@ -113,6 +165,48 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
 
             })
             .then();
+    }
+
+    private void completeUpdateInput() {
+        for (E node : thisTime.values()) {
+            E previous = oldData.get(node.getId());
+            E patch = updateData.get(node.getId());
+            if (previous != null) {
+                // 仅本次持久图补齐遗漏字段；首次存在性读取不能成为用户的移动意图。
+                List<E> children = node.getChildren();
+                Map<String, Object> updates = FastBeanCopier.copy(patch, new LinkedHashMap<>());
+                updates.values().removeIf(Objects::isNull);
+                updates.remove("children");
+                FastBeanCopier.copy(previous, node);
+                FastBeanCopier.copy(updates, node);
+                applyChildren(node, children);
+            } else {
+                // 初次展开早于持久父级补全；新节点的默认排序需按补全后的父级计算。
+                node.setSortIndex(patch.getSortIndex());
+            }
+        }
+        for (E root : updateRoots) {
+            TreeSupportEntity.expandTree2List(root, getIdGenerator());
+        }
+    }
+
+    /** 显式输入保留稀疏业务列；遗漏后代没有对应输入。 */
+    protected E getUpdateData(E node) {
+        E patch = updateData.get(node.getId());
+        if (patch != null) {
+            patch.setPath(node.getPath());
+            patch.setLevel(node.getLevel());
+            if (isNewNode(node)) {
+                patch.setSortIndex(node.getSortIndex());
+            }
+            // helper 已展开全部显式节点，逐节点保存不能再次递归写入 children。
+            applyChildren(patch, Collections.emptyList());
+        }
+        return patch;
+    }
+
+    protected boolean isNewNode(E node) {
+        return !oldData.containsKey(node.getId());
     }
 
     /** 当前完整保存明确移根，且原持久化节点具有父级。 */
@@ -262,7 +356,12 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
         //新增节点
         else if (parentId != null) {
             if (oldParent != null) {
-                data.setPath(oldParent.getPath() + "-" + RandomUtil.randomChar(4));
+                String parentPath = oldParent.getPath() + "-";
+                // 新节点经过服务 save 扩展再次准备时，保留已与当前父级一致的直接子路径。
+                if (data.getPath() == null || !data.getPath().startsWith(parentPath)
+                    || data.getPath().indexOf('-', parentPath.length()) >= 0) {
+                    data.setPath(parentPath + RandomUtil.randomChar(4));
+                }
             }
         }
     }
