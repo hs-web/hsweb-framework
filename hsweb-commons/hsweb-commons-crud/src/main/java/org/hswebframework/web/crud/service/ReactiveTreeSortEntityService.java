@@ -333,20 +333,35 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
         return ObjectUtils.isEmpty(entity.getParentId()) || "-1".equals(String.valueOf(entity.getId()));
     }
 
+    /**
+     * 在当前树删除事务内准备删除条件，完成后才读取当前节点及子树。
+     * 默认不执行任何操作；扩展实现不应修改查询参数或提前展开子树。
+     *
+     * @param queryParam 原始删除条件
+     * @return 准备完成信号
+     */
+    default Mono<Void> prepareTreeDelete(QueryParamEntity queryParam) {
+        return Mono.empty();
+    }
+
     @Override
     default ReactiveDelete createDelete() {
         return ReactiveCrudService.super.createDelete().onExecute((delete, executor) ->
             TransactionUtils.tryRunInTransaction(
                 // 完整实体用于分组和层级排序；叶先有界分片，每批SQL与事件完成后才删除父级。
                 // 全部批次仍参与同一个原事务，后批事件或调用方失败必须整体回滚。
-                queryIncludeChildren(delete.toQueryParam(QueryParamEntity::new))
-                    .sort(Comparator.comparing((E node) -> node.getLevel(),
-                                               Comparator.nullsFirst(Comparator.naturalOrder())).reversed())
-                    .map(TreeSupportEntity::getId)
-                    .buffer(getBufferSize())
-                    .concatMap(ids -> getRepository().createDelete().in("id", ids).execute())
-                    .reduce(Math::addExact)
-                    .defaultIfEmpty(0),
+                Mono.defer(() -> {
+                    QueryParamEntity queryParam = delete.toQueryParam(QueryParamEntity::new);
+                    return prepareTreeDelete(queryParam)
+                        .thenMany(Flux.defer(() -> queryIncludeChildren(queryParam)))
+                        .sort(Comparator.comparing((E node) -> node.getLevel(),
+                                                   Comparator.nullsFirst(Comparator.naturalOrder())).reversed())
+                        .map(TreeSupportEntity::getId)
+                        .buffer(getBufferSize())
+                        .concatMap(ids -> getRepository().createDelete().in("id", ids).execute())
+                        .reduce(Math::addExact)
+                        .defaultIfEmpty(0);
+                }),
                 new DefaultTransactionDefinition()));
     }
 }

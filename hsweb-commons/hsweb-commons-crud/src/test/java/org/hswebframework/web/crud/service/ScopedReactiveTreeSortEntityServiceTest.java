@@ -1,8 +1,12 @@
 package org.hswebframework.web.crud.service;
 
+import io.r2dbc.spi.ConnectionFactory;
+
 import org.hswebframework.ezorm.rdb.mapping.ReactiveQuery;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
+import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.crud.TestApplication;
+import org.hswebframework.web.crud.CountingReactiveSqlExecutor;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.crud.entity.TestTreeSortEntity;
 import org.hswebframework.web.crud.events.EntityBeforeCreateEvent;
@@ -24,11 +28,14 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.reactive.TransactionSynchronizationManager;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -60,6 +68,123 @@ public class ScopedReactiveTreeSortEntityServiceTest {
 
     @Autowired
     private BatchedTreeService batched;
+
+    @Autowired
+    private PreparedTreeService prepared;
+
+    @Autowired
+    private DatabaseOperator database;
+
+    @Test
+    public void deletePreparationWaitsBeforeExpansionAndUsesCurrentScopedSubtree() {
+        String groupA = id();
+        String groupB = id();
+        TestTreeSortEntity rootA = node(groupA, null, "aaaa");
+        TestTreeSortEntity rootB = node(groupA, null, "dddd");
+        TestTreeSortEntity branch = node(groupA, rootA.getId(), "aaaa-bbbb");
+        TestTreeSortEntity leaf = node(groupA, branch.getId(), "aaaa-bbbb-cccc");
+        leaf.setLevel(3);
+        TestTreeSortEntity otherRoot = node(groupB, null, "aaaa");
+        TestTreeSortEntity otherChild = node(groupB, otherRoot.getId(), "aaaa-bbbb");
+        List<TestTreeSortEntity> original = List.of(rootA, rootB, branch, leaf, otherRoot, otherChild);
+        prepared.getRepository().save(original)
+            .as(StepVerifier::create).expectNextCount(1).expectComplete().verify(Duration.ofSeconds(10));
+        Map<String, TestTreeSortEntity> otherBefore = stored(prepared, groupB).block(Duration.ofSeconds(10));
+        Sinks.Empty<Void> arrived = Sinks.empty();
+        Sinks.Empty<Void> release = Sinks.empty();
+        TestTreeSortEntity move = new TestTreeSortEntity();
+        move.setParentId(rootB.getId());
+        prepared.configure(query -> Mono.fromRunnable(() -> arrived.tryEmitEmpty())
+            .then(release.asMono()).then(prepared.updateById(branch.getId(), move)).then());
+        Mono<Integer> deletion = prepared.createDelete().where("id", rootA.getId()).execute();
+        assertEquals(0, prepared.getPreparationCount());
+        assertEquals(0, prepared.getExpansionCount());
+        try (CountingReactiveSqlExecutor sql = new CountingReactiveSqlExecutor(
+            database.getMetadata().getTable("test_tree_sort").orElseThrow())) {
+            StepVerifier.create(deletion).then(() -> {
+                arrived.asMono().block(Duration.ofSeconds(10));
+                assertEquals(1, prepared.getPreparationCount());
+                assertEquals("queryIncludeChildren must wait for preparation completion", 0, prepared.getExpansionCount());
+                assertEquals(0L, sql.count("delete"));
+                assertNull(listener.beforeDeleteIds.get(groupA));
+                assertNull(listener.deletedIds.get(groupA));
+                release.tryEmitEmpty();
+            }).expectNext(1).expectComplete().verify(Duration.ofSeconds(10));
+            assertEquals(1, prepared.getExpansionCount());
+            assertEquals(1L, sql.count("delete"));
+            assertEquals(List.of(rootA.getId()), listener.beforeDeleteIds.get(groupA));
+            assertEquals(List.of(rootA.getId()), listener.deletedIds.get(groupA));
+            stored(prepared, groupA).as(StepVerifier::create).assertNext(tree -> {
+                assertEquals(Set.of(rootB.getId(), branch.getId(), leaf.getId()), tree.keySet());
+                assertEquals(rootB.getId(), tree.get(branch.getId()).getParentId());
+                assertEquals(branch.getId(), tree.get(leaf.getId()).getParentId());
+                assertTreeStructure(tree.values());
+            }).expectComplete().verify(Duration.ofSeconds(10));
+            stored(prepared, groupB).as(StepVerifier::create)
+                .assertNext(tree -> assertSnapshot(otherBefore, tree)).expectComplete().verify(Duration.ofSeconds(10));
+        } finally {
+            release.tryEmitEmpty();
+            prepared.configure(query -> Mono.empty());
+            prepared.getRepository().createDelete().in("id", original.stream().map(TestTreeSortEntity::getId)
+                .collect(Collectors.toList())).execute().block(Duration.ofSeconds(10));
+        }
+    }
+
+    @Test
+    public void failedDeletePreparationRollsBackWritesWithoutExpansionSqlOrEvents() {
+        String group = id();
+        TestTreeSortEntity root = node(group, null, null);
+        TestTreeSortEntity child = node(group, root.getId(), null);
+        prepared.save(List.of(root, child)).as(StepVerifier::create).expectNextCount(1).expectComplete().verify(Duration.ofSeconds(10));
+        Map<String, TestTreeSortEntity> before = stored(prepared, group).block(Duration.ofSeconds(10));
+        IllegalStateException failure = new IllegalStateException("reject tree delete preparation");
+        prepared.configure(query -> prepared.getRepository().createUpdate().set("name", "must roll back")
+            .where("id", root.getId()).execute().then(Mono.error(failure)));
+        try (CountingReactiveSqlExecutor sql = new CountingReactiveSqlExecutor(
+            database.getMetadata().getTable("test_tree_sort").orElseThrow())) {
+            prepared.createDelete().where("id", root.getId()).execute().as(StepVerifier::create)
+                .expectErrorMatches(error -> error == failure).verify(Duration.ofSeconds(10));
+            assertEquals(1, prepared.getPreparationCount());
+            assertEquals(0, prepared.getExpansionCount());
+            assertEquals(0L, sql.count("delete"));
+            assertNull(listener.beforeDeleteIds.get(group));
+            assertNull(listener.deletedIds.get(group));
+            stored(prepared, group).as(StepVerifier::create)
+                .assertNext(after -> assertSnapshot(before, after)).expectComplete().verify(Duration.ofSeconds(10));
+        } finally {
+            prepared.configure(query -> Mono.empty());
+            prepared.getRepository().createDelete().where("groupId", group).execute().block(Duration.ofSeconds(10));
+        }
+    }
+
+    @Test
+    public void eachDeleteSubscriptionRepeatsPreparationAndReadsCurrentSeedsIncludingEmptyScope() {
+        String group = id();
+        prepared.configure(query -> Mono.empty());
+        Mono<Integer> deletion = prepared.createDelete().where("groupId", group).execute();
+        assertEquals(0, prepared.getPreparationCount());
+        assertEquals(0, prepared.getExpansionCount());
+        try {
+            for (int subscription = 1; subscription <= 2; subscription++) {
+                TestTreeSortEntity root = node(group, null, null);
+                TestTreeSortEntity child = node(group, root.getId(), null);
+                prepared.save(List.of(root, child)).as(StepVerifier::create).expectNextCount(1).expectComplete().verify(Duration.ofSeconds(10));
+                deletion.as(StepVerifier::create).expectNext(2).expectComplete().verify(Duration.ofSeconds(10));
+                assertEquals(subscription, prepared.getPreparationCount());
+                assertEquals(subscription, prepared.getExpansionCount());
+                stored(prepared, group).as(StepVerifier::create).assertNext(tree -> assertTrue(tree.isEmpty()))
+                    .expectComplete().verify(Duration.ofSeconds(10));
+            }
+            deletion.as(StepVerifier::create).expectNext(0).expectComplete().verify(Duration.ofSeconds(10));
+            assertEquals(3, prepared.getPreparationCount());
+            assertEquals(3, prepared.getExpansionCount());
+            assertEquals(4, listener.beforeDeleteIds.get(group).size());
+            assertEquals(4, listener.deletedIds.get(group).size());
+        } finally {
+            prepared.configure(query -> Mono.empty());
+            prepared.getRepository().createDelete().where("groupId", group).execute().block(Duration.ofSeconds(10));
+        }
+    }
 
     @Test
     public void samePathsInDifferentGroupsStayIsolatedForParentsChildrenAndDeletion() {
@@ -766,10 +891,65 @@ public class ScopedReactiveTreeSortEntityServiceTest {
         }
     }
 
+    /** 只观察并暂停正式通用树执行链，不模拟查询、SQL或事务。 */
+    static class PreparedTreeService extends ScopedTreeService {
+        private final ConnectionFactory connectionFactory;
+        private final AtomicInteger preparations = new AtomicInteger();
+        private final AtomicInteger expansions = new AtomicInteger();
+        private final AtomicReference<Object> preparedConnection = new AtomicReference<>();
+        private Function<QueryParamEntity, Mono<Void>> preparation = query -> Mono.empty();
+
+        PreparedTreeService(ReactiveRepository<TestTreeSortEntity, String> repository,
+                            ConnectionFactory connectionFactory) {
+            super(repository);
+            this.connectionFactory = connectionFactory;
+        }
+
+        public void configure(Function<QueryParamEntity, Mono<Void>> preparation) {
+            this.preparation = preparation;
+            preparations.set(0);
+            expansions.set(0);
+            preparedConnection.set(null);
+        }
+
+        // Spring代理上的字段不是target状态，fixture配置和观察都通过bean方法访问。
+        public int getPreparationCount() {
+            return preparations.get();
+        }
+
+        public int getExpansionCount() {
+            return expansions.get();
+        }
+
+        @Override
+        public Mono<Void> prepareTreeDelete(QueryParamEntity queryParam) {
+            preparations.incrementAndGet();
+            return TransactionSynchronizationManager.forCurrentTransaction().flatMap(transaction -> {
+                assertTrue(transaction.isActualTransactionActive());
+                Object connection = transaction.getResource(connectionFactory);
+                assertNotNull(connection);
+                preparedConnection.set(connection);
+                return preparation.apply(queryParam);
+            });
+        }
+
+        @Override
+        public Flux<TestTreeSortEntity> queryIncludeChildren(QueryParamEntity queryParam) {
+            expansions.incrementAndGet();
+            return TransactionSynchronizationManager.forCurrentTransaction().flatMapMany(transaction -> {
+                assertTrue(transaction.isActualTransactionActive());
+                assertSame(preparedConnection.get(), transaction.getResource(connectionFactory));
+                return super.queryIncludeChildren(queryParam);
+            });
+        }
+    }
+
     static class FailureListener {
         private final ReactiveRepository<TestTreeSortEntity, String> repository;
         private final AtomicInteger observedRoots = new AtomicInteger();
         private final Map<String, List<Integer>> deleteBatches = new ConcurrentHashMap<>();
+        private final Map<String, List<String>> beforeDeleteIds = new ConcurrentHashMap<>();
+        private final Map<String, List<String>> deletedIds = new ConcurrentHashMap<>();
 
         FailureListener(ReactiveRepository<TestTreeSortEntity, String> repository) {
             this.repository = repository;
@@ -869,6 +1049,9 @@ public class ScopedReactiveTreeSortEntityServiceTest {
 
         @EventListener
         public void beforeDelete(EntityBeforeDeleteEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                event.async(recordDeletedNodes(event.getEntity(), beforeDeleteIds));
+            }
             if (event.getEntityType() != TestTreeSortEntity.class
                 || event.getEntity().stream().noneMatch(node -> node.getName().startsWith("verify-delete-batch-")
                     || node.getName().startsWith("reject-delete-batch-later-"))) {
@@ -889,10 +1072,19 @@ public class ScopedReactiveTreeSortEntityServiceTest {
 
         @EventListener
         public void afterDelete(EntityDeletedEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                event.async(recordDeletedNodes(event.getEntity(), deletedIds));
+            }
             if (event.getEntityType() == TestTreeSortEntity.class
                 && event.getEntity().stream().anyMatch(node -> node.getName().startsWith("reject-delete-"))) {
                 event.async(Mono.error(new IllegalStateException("reject deleted tree")));
             }
+        }
+
+        private Mono<Void> recordDeletedNodes(List<TestTreeSortEntity> nodes, Map<String, List<String>> target) {
+            return Mono.fromRunnable(() -> nodes.stream().filter(node -> node.getGroupId() != null)
+                .forEach(node -> target.computeIfAbsent(node.getGroupId(), ignored -> new CopyOnWriteArrayList<>())
+                    .add(node.getId())));
         }
     }
 
@@ -906,6 +1098,12 @@ public class ScopedReactiveTreeSortEntityServiceTest {
         @Bean
         BatchedTreeService batchedTreeService(ReactiveRepository<TestTreeSortEntity, String> repository) {
             return new BatchedTreeService(repository);
+        }
+
+        @Bean
+        PreparedTreeService preparedTreeService(ReactiveRepository<TestTreeSortEntity, String> repository,
+                                                ConnectionFactory connectionFactory) {
+            return new PreparedTreeService(repository, connectionFactory);
         }
 
         @Bean
