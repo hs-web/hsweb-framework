@@ -48,6 +48,15 @@
 before/after/error 共享上下文。干净 CI 使用 easy-orm `4.2` 中包含该通用修复的
 `4.2.2-SNAPSHOT`。运行结果记录在对应 PR 的验证证据中。
 
+## 成员 ID 兼容性验证
+
+`DimensionUserEntity.generateId()` 保持原有三字段以 `-` 拼接后的 MD5 规则；已提供的
+ID 保持不变。`DimensionUserIdentityTest` 固定验证旧 ID，
+`DimensionUserIdentityRegressionTest` 使用真实数据库和绑定事件验证按已知 ID 保存、
+重复保存更新、查询及解绑；完整认证绑定行为同时由 `DefaultDimensionUserServiceTest` 验证。
+定向验证命令：
+`mvn -pl hsweb-system/hsweb-system-authorization/hsweb-system-authorization-default -am -Dtest=DimensionUserIdentityTest,DimensionUserIdentityRegressionTest,DefaultDimensionUserServiceTest -Dsurefire.failIfNoSpecifiedTests=false test`。
+
 # BUG
 如果知道导致bug的位置,你可以直接修改后`pull request`,也可以提交[issues](https://github.com/hs-web/hsweb-framework/issues/new).我们会尽快解决.
 
