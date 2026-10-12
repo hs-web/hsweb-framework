@@ -55,9 +55,16 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
     protected Flux<E> prepare(Flux<E> source, boolean partialUpdate) {
         Flux<E> cache = source
             .flatMapIterable(root -> {
+                // 展开和持久图补齐只修改工作副本，复用输入或重新订阅仍保留原稀疏意图。
+                Map<E, E> workingCopies = partialUpdate ? copyUpdateInput(root) : Collections.emptyMap();
+                if (partialUpdate) {
+                    root = workingCopies.get(root);
+                }
                 Map<E, E> patches = partialUpdate ? copyUpdateInput(root) : Collections.emptyMap();
                 List<E> expanded = TreeSupportEntity.expandTree2List(root, getIdGenerator());
                 if (partialUpdate) {
+                    // 沿用新增节点的 ID 回填；其他生成字段不能成为下次调用的显式输入。
+                    workingCopies.forEach((input, working) -> input.setId(working.getId()));
                     updateRoots.add(root);
                     for (E node : expanded) {
                         E patch = patches.get(node);
@@ -119,6 +126,12 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
             copies.put(node, copy);
             if (CollectionUtils.isNotEmpty(node.getChildren())) {
                 queue.addAll(node.<E>getChildren());
+            }
+        }
+        for (Map.Entry<E, E> entry : copies.entrySet()) {
+            List<E> children = entry.getKey().getChildren();
+            if (children != null) {
+                applyChildren(entry.getValue(), children.stream().map(copies::get).collect(Collectors.toList()));
             }
         }
         return copies;
@@ -194,6 +207,8 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
     protected E getUpdateData(E node) {
         E patch = updateData.get(node.getId());
         if (patch != null) {
+            // 入口可能传入调用方稀疏对象，树字段统一取当前已准备的工作节点。
+            node = allData.get(node.getId());
             E previous = oldData.get(node.getId());
             // 业务 patch 不回写未变化的隐式树字段，避免覆盖另一个事务已提交的移动。
             // 显式树输入（包括同值）及准备后的实际变化仍提交完整 path/level。

@@ -19,8 +19,10 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.Duration;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
 
@@ -84,6 +86,26 @@ public class ExplicitTreeUpdateRegressionTest {
     @Test
     public void entityNewParentKeepsExplicitExistingChildAndOmittedLeafPathsConsistent() {
         verifyNewParentWithExistingChild(true);
+    }
+
+    @Test
+    public void monoNamePatchObjectReusePreservesCommittedBusinessAndMove() {
+        verifyReusedNamePatch(false, false);
+    }
+
+    @Test
+    public void entityNamePatchObjectReusePreservesCommittedBusinessAndMove() {
+        verifyReusedNamePatch(true, false);
+    }
+
+    @Test
+    public void monoNamePatchPublisherResubscriptionPreservesCommittedBusinessAndMove() {
+        verifyReusedNamePatch(false, true);
+    }
+
+    @Test
+    public void entityNamePatchPublisherResubscriptionPreservesCommittedBusinessAndMove() {
+        verifyReusedNamePatch(true, true);
     }
 
     @Test
@@ -173,6 +195,77 @@ public class ExplicitTreeUpdateRegressionTest {
                 assertEquals(leaf.getPath(), after.get(leaf.getId()).getPath());
                 assertEquals(leaf.getSortIndex(), after.get(leaf.getId()).getSortIndex());
             }).expectComplete().verify(TIMEOUT);
+    }
+
+    private void verifyReusedNamePatch(boolean entityOverload, boolean reusePublisher) {
+        TestTreeSortEntity oldRoot = node("old-root");
+        TestTreeSortEntity targetRoot = node("target-root");
+        TestTreeSortEntity targetBranch = node("target-branch");
+        TestTreeSortEntity target = node("target");
+        TestTreeSortEntity branch = node("branch-before");
+        TestTreeSortEntity leaf = node("leaf-before");
+        branch.setSortIndex(37L);
+        leaf.setSortIndex(84L);
+        oldRoot.setChildren(List.of(branch));
+        branch.setChildren(List.of(leaf));
+        targetRoot.setChildren(List.of(targetBranch));
+        targetBranch.setChildren(List.of(target));
+        List<String> ids = List.of(oldRoot.getId(), targetRoot.getId(), targetBranch.getId(),
+                                   target.getId(), branch.getId(), leaf.getId());
+        Map<String, String> movedParents = new LinkedHashMap<>();
+        movedParents.put(oldRoot.getId(), null);
+        movedParents.put(targetRoot.getId(), null);
+        movedParents.put(targetBranch.getId(), targetRoot.getId());
+        movedParents.put(target.getId(), targetBranch.getId());
+        movedParents.put(branch.getId(), target.getId());
+        movedParents.put(leaf.getId(), branch.getId());
+        service.save(List.of(oldRoot, targetRoot))
+            .as(StepVerifier::create).expectNextCount(1).expectComplete().verify(TIMEOUT);
+        try {
+            TestTreeSortEntity namePatch = patch("branch-after");
+            Mono<Integer> firstUpdate = update(branch.getId(), namePatch, entityOverload);
+            firstUpdate.as(StepVerifier::create).expectNext(1).expectComplete().verify(TIMEOUT);
+            stored(ids).as(StepVerifier::create).assertNext(after -> {
+                assertEquals("branch-after", after.get(branch.getId()).getName());
+                assertEquals("business-before", after.get(branch.getId()).getDefaultTest());
+                assertEquals(oldRoot.getId(), after.get(branch.getId()).getParentId());
+            }).expectComplete().verify(TIMEOUT);
+
+            // 每个订阅完成后再发起下一次操作，业务修改和移动已在独立事务中提交。
+            TestTreeSortEntity businessPatch = new TestTreeSortEntity();
+            businessPatch.setDefaultTest("business-after");
+            update(branch.getId(), businessPatch, entityOverload)
+                .as(StepVerifier::create).expectNext(1).expectComplete().verify(TIMEOUT);
+            service.findById(branch.getId()).flatMap(existing -> {
+                existing.setParentId(target.getId());
+                return service.save(existing);
+            }).as(StepVerifier::create).expectNextCount(1).expectComplete().verify(TIMEOUT);
+            AtomicReference<Map<String, List<Object>>> committed = new AtomicReference<>();
+            stored(ids).as(StepVerifier::create).assertNext(moved -> {
+                TreeCrudTestSupport.assertPersistedTree(moved.values(), movedParents);
+                assertEquals("branch-after", moved.get(branch.getId()).getName());
+                assertEquals("business-after", moved.get(branch.getId()).getDefaultTest());
+                assertEquals("leaf-before", moved.get(leaf.getId()).getName());
+                assertEquals("business-before", moved.get(leaf.getId()).getDefaultTest());
+                assertEquals(Long.valueOf(37), moved.get(branch.getId()).getSortIndex());
+                assertEquals(Long.valueOf(84), moved.get(leaf.getId()).getSortIndex());
+                committed.set(TreeCrudTestSupport.snapshot(moved.values()));
+            }).expectComplete().verify(TIMEOUT);
+
+            // 分别复用调用方对象创建新操作、以及重新订阅原操作；两者仍只有名称修改意图。
+            Mono<Integer> repeated = reusePublisher ? firstUpdate : update(branch.getId(), namePatch, entityOverload);
+            repeated.as(StepVerifier::create).expectNextCount(1).expectComplete().verify(TIMEOUT);
+            stored(ids).as(StepVerifier::create).assertNext(after -> {
+                assertEquals("business-after", after.get(branch.getId()).getDefaultTest());
+                assertEquals(target.getId(), after.get(branch.getId()).getParentId());
+                TreeCrudTestSupport.assertPersistedTree(after.values(), movedParents);
+                assertEquals(committed.get(), TreeCrudTestSupport.snapshot(after.values()));
+            }).expectComplete().verify(TIMEOUT);
+        } finally {
+            // 清理固定六个输入实体，避免依赖被测子树查询和删除路径。
+            service.getRepository().createDelete().in("id", ids).execute()
+                .as(StepVerifier::create).expectNext(6).expectComplete().verify(TIMEOUT);
+        }
     }
 
     private void verifyNewChild(boolean entityOverload) {
