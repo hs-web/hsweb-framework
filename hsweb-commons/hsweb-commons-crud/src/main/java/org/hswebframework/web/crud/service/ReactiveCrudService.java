@@ -10,10 +10,8 @@ import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.api.crud.entity.TransactionManagers;
 import org.hswebframework.web.crud.query.QueryHelper;
 import org.hswebframework.web.crud.query.PagerQueryPolicy;
-import org.hswebframework.web.crud.utils.TransactionUtils;
 import org.reactivestreams.Publisher;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.context.ContextView;
@@ -73,9 +71,7 @@ public interface ReactiveCrudService<E, K> {
      * @return 动态更新接口
      */
     default ReactiveUpdate<E> createUpdate() {
-        // DSL 构造方法返回的不是 Publisher；在 execute 时统一包住 SQL 和实体事件。
-        return getRepository().createUpdate().onExecute((update, operation) ->
-            TransactionUtils.tryRunInTransaction(operation, new DefaultTransactionDefinition()));
+        return getRepository().createUpdate();
     }
 
     /**
@@ -92,8 +88,7 @@ public interface ReactiveCrudService<E, K> {
      * @return 动态更新接口
      */
     default ReactiveDelete createDelete() {
-        return getRepository().createDelete().onExecute((delete, operation) ->
-            TransactionUtils.tryRunInTransaction(operation, new DefaultTransactionDefinition()));
+        return getRepository().createDelete();
     }
 
 

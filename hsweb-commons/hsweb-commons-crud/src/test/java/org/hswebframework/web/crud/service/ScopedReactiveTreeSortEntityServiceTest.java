@@ -214,8 +214,12 @@ public class ScopedReactiveTreeSortEntityServiceTest {
         root.setChildren(List.of(child));
         scoped.save(root).as(StepVerifier::create).expectNextCount(1).verifyComplete();
         String before = root.getName();
-        scoped.createUpdate().set("name", "reject-dsl-" + id()).where("id", root.getId()).execute()
-            .as(StepVerifier::create).expectError(IllegalStateException.class).verify();
+        // 普通 DSL 的完整 SQL 与 after 事件链由调用方明确声明事务。
+        TransactionUtils.tryRunInTransaction(
+            scoped.createUpdate().set("name", "reject-dsl-" + id()).where("id", root.getId()).execute(),
+            new DefaultTransactionDefinition())
+            .as(StepVerifier::create).expectErrorMatches(error -> error instanceof IllegalStateException
+                && "reject modified tree".equals(error.getMessage())).verify();
         scoped.findById(root.getId()).as(StepVerifier::create)
             .assertNext(existing -> assertEquals(before, existing.getName())).verifyComplete();
         scoped.createUpdate().set("name", "reject-delete-" + id()).where("id", root.getId()).execute()

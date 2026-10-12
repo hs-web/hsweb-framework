@@ -2,17 +2,24 @@ package org.hswebframework.web.crud.service;
 
 import org.hswebframework.ezorm.rdb.mapping.ReactiveQuery;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
+import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.crud.TestApplication;
+import org.hswebframework.web.crud.CountingReactiveSqlExecutor;
 import org.hswebframework.web.crud.entity.TestTreeSortEntity;
 import org.hswebframework.web.crud.events.EntityDeletedEvent;
+import org.hswebframework.web.crud.events.EntityCreatedEvent;
+import org.hswebframework.web.crud.events.EntitySavedEvent;
+import org.hswebframework.web.crud.events.EntityModifyEvent;
 import org.hswebframework.web.crud.utils.TransactionUtils;
 import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.id.IDGenerator;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -51,9 +58,21 @@ public class ReactiveTreeCrudCoverageTest {
     @Autowired
     private DeleteEvents events;
 
+    @Autowired
+    private DatabaseOperator database;
+
+    private CountingReactiveSqlExecutor sql;
+
+    @Before
+    public void countRealSql() {
+        sql = new CountingReactiveSqlExecutor(database.getMetadata().getTable("test_tree_sort").orElseThrow());
+    }
+
     @After
     public void resetEvents() {
         events.cancellation = null;
+        events.writeFailure = null;
+        sql.close();
     }
 
     @Test
@@ -228,6 +247,94 @@ public class ReactiveTreeCrudCoverageTest {
         service.findById(callerRow.getId()).as(StepVerifier::create).expectComplete().verify(TIMEOUT);
     }
 
+    @Test
+    public void nonProxiedTreeWritesKeepTheirOwnTransaction() {
+        CoverageTreeService direct = new CoverageTreeService(service.getRepository());
+        assertFalse(AopUtils.isAopProxy(direct));
+        for (String operation : List.of("insert", "save", "update")) {
+            TreeCrudTestSupport.Forest forest = "insert".equals(operation)
+                ? new TreeCrudTestSupport.Forest() : insertForest();
+            Map<String, List<Object>> before = TreeCrudTestSupport.snapshot(storedGroup(forest.group));
+            WriteFailure failure = new WriteFailure(forest.group, operation);
+            events.writeFailure = failure;
+            TestTreeSortEntity patch = new TestTreeSortEntity();
+            patch.setId(forest.id("east-left"));
+            patch.setGroupId(forest.group);
+            patch.setParentId(forest.id("west"));
+            patch.setName("moved branch");
+            Mono<?> write = "insert".equals(operation) ? direct.insertBatch(Mono.just(forest.childFirst()))
+                : "save".equals(operation) ? direct.save(Flux.just(patch))
+                : direct.updateById(patch.getId(), Mono.just(patch));
+
+            write.as(StepVerifier::create).expectErrorMatches(error -> error == failure.rejection).verify(TIMEOUT);
+            failure.completion.asMono().as(StepVerifier::create)
+                .expectNext(TransactionSynchronization.STATUS_ROLLED_BACK).expectComplete().verify(TIMEOUT);
+            assertEquals(2, failure.batches.get());
+            assertEquals(before, TreeCrudTestSupport.snapshot(storedGroup(forest.group)));
+            events.writeFailure = null;
+        }
+    }
+
+    @Test
+    public void nonProxiedDeleteLaterBatchFailureAndCancellationRestoreCompleteTree() {
+        for (boolean reject : List.of(true, false)) {
+            TreeCrudTestSupport.Forest forest = insertForest();
+            Map<String, List<Object>> before = TreeCrudTestSupport.snapshot(storedGroup(forest.group));
+            CoverageTreeService direct = new CoverageTreeService(service.getRepository());
+            assertFalse(AopUtils.isAopProxy(direct));
+            DeleteCancellation control = new DeleteCancellation(forest.group,
+                TreeCrudTestSupport.subtree(forest.parents, forest.id("east")), reject);
+            events.cancellation = control;
+            sql.reset();
+            Mono<Integer> delete = direct.createDelete().in("id", List.of(forest.id("east"),
+                forest.id("east-left"))).execute();
+            if (reject) {
+                delete.as(StepVerifier::create).expectErrorMatches(error -> error == control.rejection).verify(TIMEOUT);
+            } else {
+                delete.takeUntilOther(control.started.asMono()).as(StepVerifier::create)
+                    .expectComplete().verify(TIMEOUT);
+            }
+            control.completion.asMono().as(StepVerifier::create)
+                .expectNext(TransactionSynchronization.STATUS_ROLLED_BACK).expectComplete().verify(TIMEOUT);
+            assertEquals(2, control.batches.get());
+            assertEquals(2, sql.count("delete"));
+            assertEquals(4, Set.copyOf(control.deletedIds).size());
+            assertTrue(control.expectedSubtree.containsAll(control.deletedIds));
+            assertEquals(before, TreeCrudTestSupport.snapshot(storedGroup(forest.group)));
+            events.cancellation = null;
+        }
+    }
+
+    @Test
+    public void nonProxiedDeleteKeepsAppendedHooksAndExecutesOnlyExpectedBatches() {
+        TreeCrudTestSupport.Forest forest = insertForest();
+        CoverageTreeService direct = new CoverageTreeService(service.getRepository());
+        Set<String> subtree = TreeCrudTestSupport.subtree(forest.parents, forest.id("east"));
+        Set<String> survivors = TreeCrudTestSupport.subtree(forest.parents, forest.id("west"));
+        Map<String, List<Object>> retained = TreeCrudTestSupport.snapshot(service.getRepository()
+            .findById(survivors).collectList().block(TIMEOUT));
+        List<String> hooks = new ArrayList<>();
+        sql.reset();
+        direct.createDelete().in("id", List.of(forest.id("east"), forest.id("east-left")))
+            .onExecute((delete, operation) -> Mono.defer(() -> {
+                hooks.add("before");
+                return operation.doOnNext(count -> hooks.add("after:" + count));
+            })).execute().as(StepVerifier::create).expectNext(subtree.size()).expectComplete().verify(TIMEOUT);
+        assertEquals(List.of("before", "after:" + subtree.size()), hooks);
+        assertEquals((subtree.size() + 1) / 2, sql.count("delete"));
+        assertEquals(retained, TreeCrudTestSupport.snapshot(storedGroup(forest.group)));
+        sql.reset();
+        AtomicInteger zeroHook = new AtomicInteger();
+        direct.createDelete().where("id", forest.id("east"))
+            .onExecute((delete, operation) -> operation.doOnNext(count -> {
+                assertEquals(Integer.valueOf(0), count);
+                zeroHook.incrementAndGet();
+            })).execute().as(StepVerifier::create).expectNext(0).expectComplete().verify(TIMEOUT);
+        assertEquals(1, zeroHook.get());
+        assertEquals(0, sql.count("delete"));
+        assertEquals(retained, TreeCrudTestSupport.snapshot(storedGroup(forest.group)));
+    }
+
     private TreeCrudTestSupport.Forest insertForest() {
         TreeCrudTestSupport.Forest forest = new TreeCrudTestSupport.Forest();
         service.insertBatch(Mono.just(forest.childFirst())).as(StepVerifier::create)
@@ -272,13 +379,66 @@ public class ReactiveTreeCrudCoverageTest {
         }
     }
 
-    /** 控制器只接入真实 DeletedEvent，第二批 SQL 已删除行后才发取消信号。 */
+    /** 只接入真实实体 after 事件；后批 SQL 已持久化后才拒绝或发取消信号。 */
     static class DeleteEvents {
         private final ReactiveRepository<TestTreeSortEntity, String> repository;
         private volatile DeleteCancellation cancellation;
+        private volatile WriteFailure writeFailure;
 
         DeleteEvents(ReactiveRepository<TestTreeSortEntity, String> repository) {
             this.repository = repository;
+        }
+
+        @EventListener
+        public void created(EntityCreatedEvent<TestTreeSortEntity> event) {
+            WriteFailure current = writeFailure;
+            if (event.getEntityType() == TestTreeSortEntity.class && current != null
+                && "insert".equals(current.operation)
+                && event.getEntity().stream().anyMatch(node -> current.group.equals(node.getGroupId()))) {
+                event.async(rejectSecondWrite(current, event.getEntity()));
+            }
+        }
+
+        @EventListener
+        public void saved(EntitySavedEvent<TestTreeSortEntity> event) {
+            WriteFailure current = writeFailure;
+            if (event.getEntityType() == TestTreeSortEntity.class && current != null
+                && "save".equals(current.operation)
+                && event.getEntity().stream().anyMatch(node -> current.group.equals(node.getGroupId()))) {
+                event.async(rejectSecondWrite(current, event.getEntity()));
+            }
+        }
+
+        @EventListener
+        public void modified(EntityModifyEvent<TestTreeSortEntity> event) {
+            WriteFailure current = writeFailure;
+            if (event.getEntityType() == TestTreeSortEntity.class && current != null
+                && "update".equals(current.operation)
+                && event.getAfter().stream().anyMatch(node -> current.group.equals(node.getGroupId()))) {
+                event.async(rejectSecondWrite(current, event.getAfter()));
+            }
+        }
+
+        private Mono<Void> rejectSecondWrite(WriteFailure current, List<TestTreeSortEntity> batch) {
+            return Mono.defer(() -> {
+                if (current.batches.incrementAndGet() != 2) {
+                    return Mono.empty();
+                }
+                return TransactionSynchronizationManager.forCurrentTransaction().flatMap(manager -> {
+                    assertTrue("non-proxied compound writes must have a real transaction", manager.isActualTransactionActive());
+                    manager.registerSynchronization(new TransactionSynchronization() {
+                        @Override
+                        public Mono<Void> afterCompletion(int status) {
+                            return Mono.fromRunnable(() -> current.completion.emitValue(status,
+                                Sinks.EmitFailureHandler.FAIL_FAST));
+                        }
+                    });
+                    return repository.createQuery().in("id", TreeCrudTestSupport.ids(batch)).count();
+                }).flatMap(count -> {
+                    assertEquals("the rejecting event must observe persisted SQL", Integer.valueOf(batch.size()), count);
+                    return Mono.error(current.rejection);
+                });
+            });
         }
 
         @EventListener
@@ -304,6 +464,9 @@ public class ReactiveTreeCrudCoverageTest {
                         return repository.createQuery().in("id", List.copyOf(current.deletedIds)).count();
                     }).flatMap(remaining -> {
                         assertEquals("both deleted SQL batches must already be visible", Integer.valueOf(0), remaining);
+                        if (current.reject) {
+                            return Mono.error(current.rejection);
+                        }
                         return Mono.fromRunnable(() -> current.started.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST))
                             .then(Mono.<Void>never());
                     });
@@ -319,10 +482,30 @@ public class ReactiveTreeCrudCoverageTest {
         private final List<String> deletedIds = new ArrayList<>();
         private final Sinks.Empty<Void> started = Sinks.empty();
         private final Sinks.One<Integer> completion = Sinks.one();
+        private final boolean reject;
+        private final IllegalStateException rejection = new IllegalStateException("reject later delete event");
 
         DeleteCancellation(String group, Set<String> expectedSubtree) {
+            this(group, expectedSubtree, false);
+        }
+
+        DeleteCancellation(String group, Set<String> expectedSubtree, boolean reject) {
             this.group = group;
             this.expectedSubtree = expectedSubtree;
+            this.reject = reject;
+        }
+    }
+
+    static class WriteFailure {
+        private final String group;
+        private final String operation;
+        private final AtomicInteger batches = new AtomicInteger();
+        private final Sinks.One<Integer> completion = Sinks.one();
+        private final IllegalStateException rejection = new IllegalStateException("reject later tree write event");
+
+        WriteFailure(String group, String operation) {
+            this.group = group;
+            this.operation = operation;
         }
     }
 
