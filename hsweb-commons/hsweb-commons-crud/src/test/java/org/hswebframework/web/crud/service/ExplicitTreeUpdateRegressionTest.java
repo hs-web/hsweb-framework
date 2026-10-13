@@ -2,6 +2,10 @@ package org.hswebframework.web.crud.service;
 
 import org.hswebframework.web.crud.TestApplication;
 import org.hswebframework.web.crud.entity.TestTreeSortEntity;
+import org.hswebframework.web.crud.events.EntityBeforeModifyEvent;
+import org.hswebframework.web.crud.events.EntityBeforeSaveEvent;
+import org.hswebframework.web.crud.events.EntityModifyEvent;
+import org.hswebframework.web.crud.events.EntitySavedEvent;
 import org.hswebframework.web.crud.web.reactive.ReactiveServiceSaveController;
 import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.id.IDGenerator;
@@ -10,6 +14,9 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestComponent;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -22,13 +29,15 @@ import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
 
 /** 显式嵌套节点保留修改和创建语义，自动展开的后代只维护树字段。 */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TestApplication.class, TestTreeSortEntityService.class}, properties = {
+@SpringBootTest(classes = {TestApplication.class, TestTreeSortEntityService.class,
+    ExplicitTreeUpdateRegressionTest.HttpEventConfiguration.class}, properties = {
     "spring.r2dbc.generate-unique-name=true",
     "spring.r2dbc.name=ExplicitTreeUpdateRegressionTest"
 })
@@ -37,6 +46,9 @@ public class ExplicitTreeUpdateRegressionTest {
 
     @Autowired
     private TestTreeSortEntityService service;
+
+    @Autowired
+    private HttpTreeEventListener httpEvents;
 
     @Test
     public void monoPatchUpdatesExplicitExistingChildAndPreservesOmittedFields() {
@@ -106,6 +118,132 @@ public class ExplicitTreeUpdateRegressionTest {
     @Test
     public void entityNamePatchPublisherResubscriptionPreservesCommittedBusinessAndMove() {
         verifyReusedNamePatch(true, true);
+    }
+
+    @Test
+    public void publicPutSparseNameUpdatePreservesParentAndOmittedSubtree() {
+        TestTreeSortEntity root = node("root-before");
+        TestTreeSortEntity child = node("child-before");
+        TestTreeSortEntity leaf = node("leaf-before");
+        child.setSortIndex(37L);
+        leaf.setSortIndex(84L);
+        leaf.setDefaultTest("leaf-business");
+        root.setChildren(List.of(child));
+        child.setChildren(List.of(leaf));
+        save(root);
+        List<String> ids = List.of(root.getId(), child.getId(), leaf.getId());
+        Map<String, TestTreeSortEntity> before = stored(ids).block(TIMEOUT);
+        Map<String, List<Object>> beforeSnapshot = TreeCrudTestSupport.snapshot(before.values());
+        for (boolean explicitNull : List.of(false, true)) {
+            Map<String, Object> payload = new LinkedHashMap<>();
+            payload.put("name", "renamed-put-" + explicitNull);
+            payload.put("defaultTest", null);
+            if (explicitNull) {
+                payload.put("parentId", null);
+            }
+            httpEvents.reset();
+            client().put().uri("/tree/{id}", child.getId()).contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload).exchange().expectStatus().isOk()
+                .expectBody(Boolean.class).isEqualTo(true);
+            stored(ids).as(StepVerifier::create).assertNext(after -> {
+                TestTreeSortEntity updated = after.get(child.getId());
+                assertEquals("renamed-put-" + explicitNull, updated.getName());
+                assertEquals("business-before", updated.getDefaultTest());
+                assertEquals(root.getId(), updated.getParentId());
+                assertEquals(before.get(child.getId()).getPath(), updated.getPath());
+                assertEquals(Integer.valueOf(2), updated.getLevel());
+                assertEquals(Long.valueOf(37), updated.getSortIndex());
+                Map<String, List<Object>> afterSnapshot = TreeCrudTestSupport.snapshot(after.values());
+                assertEquals(beforeSnapshot.get(root.getId()), afterSnapshot.get(root.getId()));
+                assertEquals(beforeSnapshot.get(leaf.getId()), afterSnapshot.get(leaf.getId()));
+                assertEquals(afterSnapshot.get(child.getId()), httpEvents.getBeforeModify(child.getId()));
+                assertEquals(afterSnapshot.get(child.getId()), httpEvents.getModified(child.getId()));
+                assertNull("existing PUT must use Modify rather than Save", httpEvents.getBeforeSave(child.getId()));
+                assertNull(httpEvents.getSaved(child.getId()));
+            }).expectComplete().verify(TIMEOUT);
+            service.queryIncludeChildren(List.of(root.getId())).count()
+                .as(StepVerifier::create).expectNext(3L).verifyComplete();
+        }
+    }
+
+    @Test
+    public void publicPatchFullNullParentMovesSubtreeAndCreatesMissingId() {
+        TestTreeSortEntity root = node("root-before");
+        TestTreeSortEntity child = node("child-before");
+        TestTreeSortEntity leaf = node("leaf-before");
+        child.setSortIndex(37L);
+        leaf.setSortIndex(84L);
+        leaf.setDefaultTest("leaf-business");
+        root.setChildren(List.of(child));
+        child.setChildren(List.of(leaf));
+        save(root);
+        Map<String, TestTreeSortEntity> before = stored(List.of(root.getId(), child.getId(), leaf.getId()))
+            .block(TIMEOUT);
+        Map<String, List<Object>> beforeSnapshot = TreeCrudTestSupport.snapshot(before.values());
+        TestTreeSortEntity complete = before.get(child.getId());
+        complete.setParentId(null);
+        complete.setName("moved-root");
+        TestTreeSortEntity added = node("http-created-root");
+        service.findById(added.getId()).as(StepVerifier::create).verifyComplete();
+        httpEvents.reset();
+        // 完整表达提交节点的树关系；遗漏 children 仍保留原后代，不作为删除清单。
+        client().patch().uri("/tree").contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(List.of(fullSavePayload(complete), fullSavePayload(added)))
+            .exchange().expectStatus().isOk();
+        stored(List.of(root.getId(), child.getId(), leaf.getId(), added.getId()))
+            .as(StepVerifier::create).assertNext(after -> {
+                assertEquals(4, after.size());
+                TestTreeSortEntity moved = after.get(child.getId());
+                TestTreeSortEntity movedLeaf = after.get(leaf.getId());
+                TestTreeSortEntity created = after.get(added.getId());
+                assertNull(moved.getParentId());
+                assertEquals("moved-root", moved.getName());
+                assertEquals("business-before", moved.getDefaultTest());
+                assertEquals(Long.valueOf(37), moved.getSortIndex());
+                assertEquals(Integer.valueOf(1), moved.getLevel());
+                assertFalse(moved.getPath().contains("-"));
+                assertNotEquals(beforeSnapshot.get(child.getId()).get(1), moved.getPath());
+                assertEquals(child.getId(), movedLeaf.getParentId());
+                assertTrue(movedLeaf.getPath().startsWith(moved.getPath() + "-"));
+                assertEquals(Integer.valueOf(2), movedLeaf.getLevel());
+                assertEquals("leaf-before", movedLeaf.getName());
+                assertEquals("leaf-business", movedLeaf.getDefaultTest());
+                assertEquals(Long.valueOf(84), movedLeaf.getSortIndex());
+                assertNull(created.getParentId());
+                assertEquals("http-created-root", created.getName());
+                assertEquals("business-before", created.getDefaultTest());
+                assertEquals(Integer.valueOf(1), created.getLevel());
+                assertFalse(created.getPath().contains("-"));
+                Map<String, List<Object>> afterSnapshot = TreeCrudTestSupport.snapshot(after.values());
+                assertEquals(beforeSnapshot.get(root.getId()), afterSnapshot.get(root.getId()));
+                for (String id : List.of(child.getId(), leaf.getId(), added.getId())) {
+                    assertEquals(afterSnapshot.get(id), httpEvents.getBeforeSave(id));
+                    assertEquals(afterSnapshot.get(id), httpEvents.getSaved(id));
+                }
+                assertNull(httpEvents.getBeforeSave(root.getId()));
+                assertNotNull("root clear retains the formal Modify boundary", httpEvents.getModified(child.getId()));
+                assertNull(httpEvents.getBeforeModify(child.getId()).get(0));
+                assertNull(httpEvents.getModified(child.getId()).get(0));
+                assertEquals(moved.getPath(), httpEvents.getModified(child.getId()).get(1));
+                assertEquals(Integer.valueOf(1), httpEvents.getModified(child.getId()).get(2));
+            }).expectComplete().verify(TIMEOUT);
+        service.queryIncludeChildren(List.of(root.getId())).count()
+            .as(StepVerifier::create).expectNext(1L).verifyComplete();
+        service.queryIncludeChildren(List.of(child.getId())).count()
+            .as(StepVerifier::create).expectNext(2L).verifyComplete();
+    }
+
+    private static Map<String, Object> fullSavePayload(TestTreeSortEntity entity) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("id", entity.getId());
+        payload.put("name", entity.getName());
+        payload.put("defaultTest", entity.getDefaultTest());
+        payload.put("groupId", entity.getGroupId());
+        payload.put("parentId", entity.getParentId());
+        payload.put("path", entity.getPath());
+        payload.put("level", entity.getLevel());
+        payload.put("sortIndex", entity.getSortIndex());
+        return payload;
     }
 
     @Test
@@ -401,6 +539,62 @@ public class ExplicitTreeUpdateRegressionTest {
         TestTreeSortEntity patch = new TestTreeSortEntity();
         patch.setName(name);
         return patch;
+    }
+
+    /** HTTP 入口经过真实仓储后，核对正式事件提供的完整树与业务字段。 */
+    public static class HttpTreeEventListener {
+        private final Map<String, List<Object>> beforeModify = new ConcurrentHashMap<>();
+        private final Map<String, List<Object>> modified = new ConcurrentHashMap<>();
+        private final Map<String, List<Object>> beforeSave = new ConcurrentHashMap<>();
+        private final Map<String, List<Object>> saved = new ConcurrentHashMap<>();
+
+        public void reset() {
+            beforeModify.clear();
+            modified.clear();
+            beforeSave.clear();
+            saved.clear();
+        }
+
+        public List<Object> getBeforeModify(String id) { return beforeModify.get(id); }
+        public List<Object> getModified(String id) { return modified.get(id); }
+        public List<Object> getBeforeSave(String id) { return beforeSave.get(id); }
+        public List<Object> getSaved(String id) { return saved.get(id); }
+
+        @EventListener
+        public void beforeModify(EntityBeforeModifyEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                beforeModify.putAll(TreeCrudTestSupport.snapshot(event.getAfter()));
+            }
+        }
+
+        @EventListener
+        public void modified(EntityModifyEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                modified.putAll(TreeCrudTestSupport.snapshot(event.getAfter()));
+            }
+        }
+
+        @EventListener
+        public void beforeSave(EntityBeforeSaveEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                beforeSave.putAll(TreeCrudTestSupport.snapshot(event.getEntity()));
+            }
+        }
+
+        @EventListener
+        public void saved(EntitySavedEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                saved.putAll(TreeCrudTestSupport.snapshot(event.getEntity()));
+            }
+        }
+    }
+
+    @TestConfiguration
+    public static class HttpEventConfiguration {
+        @Bean
+        public HttpTreeEventListener httpTreeEventListener() {
+            return new HttpTreeEventListener();
+        }
     }
 
     @TestComponent

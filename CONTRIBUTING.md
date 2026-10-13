@@ -48,6 +48,58 @@
 before/after/error 共享上下文。干净 CI 使用 easy-orm `4.2` 中包含该通用修复的
 `4.2.2-SNAPSHOT`。运行结果记录在对应 PR 的验证证据中。
 
+## 树 Save 与部分更新的契约
+
+树 save 按提交实体的完整树关系保存：已有节点的 `parentId=null` 表示移根，
+共用 helper 维护 path/level 和原有后代；父级清空 SQL 与正式 Modify/Save 事件参与同一
+事务。遗漏 children 不自动删除后代。业务列的 null 仍遵循现有 ORM 忽略 null、生成
+默认值等规则，这一契约不提供整实体的全量 Replace。
+
+公开 `PATCH /资源` 是批量 Save/upsert，已有 ID 保存、不存在的 ID 新增；
+`PUT /资源/{id}` 是正式 `updateById` 部分更新入口，null 沿用持久父级和业务字段。
+既有节点的名称等稀疏修改应使用更新入口，完整 Save 必须表达本次需要的树关系。
+同步树准备覆盖 `insert(Collection)` / `save(List)`，普通同步 `updateById` 不提供
+结构修图；响应式树 `updateById` 维护显式关系变化及遗漏后代的必要树字段。
+
+实现位于 `hsweb-commons/hsweb-commons-crud` 的 `TreeSortServiceHelper`、
+`TreeSortEntityService`、`ReactiveTreeSortEntityService`；公开路由由
+`ReactiveServiceSaveController` 提供。`ExplicitTreeUpdateRegressionTest` 通过真实
+R2DBC H2 / HTTP 和正式实体事件验证 PUT 遗漏或传 null 父级时保留关系，及 PATCH
+完整 null 父级移根、保留遗漏后代和同批不存在 ID 新增。
+
+## 树 updateById 的业务校验边界
+
+响应式树 `updateById` 对目标及显式既有 child 保持纯 UPDATE，使用正式 Modify 的
+完整 before/after 事件；目标已被另一事务删除时返回零，不能以 Save/UPSERT 重新
+创建目标或继续创建 child。显式新 child 经过服务 Save；自动补齐的后代只维护必要树字段。
+
+`save(Publisher)` 覆写只拥有 Save 入口。原来在该覆写中校验既有节点更新的业务，需要
+将更新规则迁移到 `EntityBeforeModifyEvent.getAfter()`；新增和 Save 分别监听
+`EntityBeforeCreateEvent` / `EntityBeforeSaveEvent`，共同调用业务模块自己的校验函数。
+既有 Save 覆写不会自动成为 UPDATE 的校验入口。
+
+`TreeEntityEventValidationRegressionTest` 的 8 个真实 Spring / R2DBC H2 用例已通过：
+两种 updateById overload 的目标拒绝、显式既有 child 拒绝和新 child 拒绝，以及直接
+Create/Save 共用校验。正式 Modify after 包含持久业务列和完整树字段，child 拒绝前
+读取实际已写父节点，拒绝后原事务恢复整个持久快照。
+
+框架本次定向集成验证共 15 组、109 个用例：108 通过、1 个既有跳过、0 失败、0 错误；
+跳过项为 `EntityEventListenerTest.testInsertError`。验证期间输入、依赖和执行入口保持
+稳定，结果检查通过。这一结果只覆盖框架选定范围；普通树并发边界见下节。
+以上契约的定向复验入口：
+`mvn -pl hsweb-commons/hsweb-commons-crud -am -Dtest=ExplicitTreeUpdateRegressionTest,SyncTreeCrudRegressionTest,ScopedReactiveTreeSortEntityServiceTest,TreeEntityEventValidationRegressionTest -Dsurefire.failIfNoSpecifiedTests=false test`。
+
+## 普通树删除的并发边界
+
+响应式普通树在子树展开后按 ID 快照执行叶先分批删除。没有 parent 外键或共同领域
+约束时，另一事务在展开与删除 SQL 之间提交的新 child 可能不在删除快照内，并留下
+失去父节点的记录；框架当前不保证普通树并发新增/删除的关系完整性。
+
+当前方案不新增通用锁，也不扩大已有领域锁策略。业务需要该并发保证时，应让关联
+写入和删除遵守同一领域约束；已有 `prepareTreeDelete` 领域锁的保证仅适用于共同
+遵守该约束的操作。框架已验证的复合事务、完整实体事件、分组隔离、叶先分批、取消
+与回滚，不能外推为所有普通树的并发关系保证。
+
 ## 成员 ID 兼容性验证
 
 `DimensionUserEntity.generateId()` 保持原有三字段以 `-` 拼接后的 MD5 规则；已提供的

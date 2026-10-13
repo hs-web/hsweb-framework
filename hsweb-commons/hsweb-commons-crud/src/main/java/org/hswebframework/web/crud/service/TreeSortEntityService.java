@@ -86,6 +86,10 @@ public interface TreeSortEntityService<E extends TreeSortSupportEntity<K>, K>
             .orElse(0);
     }
 
+    /**
+     * 按提交实体保存完整树关系，已有节点的 null parentId 表示移根。
+     * 遗漏 children 不自动删除后代；业务列的 null 沿用 ORM 保存规则。
+     */
     @Override
     @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.jdbcTransactionManager)
     default SaveResult save(List<E> entities) {

@@ -7,6 +7,7 @@ import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.ezorm.rdb.operator.dml.Terms;
 import org.hswebframework.web.api.crud.entity.*;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.crud.events.EntityBeforeModifyEvent;
 import org.hswebframework.web.crud.utils.TransactionUtils;
 import org.reactivestreams.Publisher;
 import org.springframework.transaction.annotation.Transactional;
@@ -203,6 +204,10 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
         return 200;
     }
 
+    /**
+     * 按提交实体保存完整树关系，已有节点的 null parentId 表示移根。
+     * 遗漏 children 不自动删除后代；业务列的 null 沿用 ORM 保存规则。
+     */
     @Override
     @Transactional(rollbackFor = Throwable.class,
         transactionManager = TransactionManagers.reactiveTransactionManager)
@@ -248,8 +253,11 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
 
     /**
      * 部分更新忽略 null；显式 children 参与修改和新增，遗漏后代仅维护树字段。
-     * 已有节点使用 ORM Modify 完整 before/after 事件，新节点经过服务 save 保留业务扩展。
-     * 显式移根使用完整 save 或维护树生命周期的 DSL。
+     * 目标及显式已有 child 始终执行 UPDATE，通过 ORM Modify 完整 before/after 事件校验。
+     * 业务更新规则应监听 {@link EntityBeforeModifyEvent} 的 after；save(Publisher) 覆写只拥有 Save 入口。
+     * 新 child 经过服务 save，使用对应的 BeforeSave/BeforeCreate 规则；任一拒绝回滚整个树更新。
+     * 目标并发消失时返回零，不使用 Save/UPSERT 重建目标，也不继续写入 children。
+     * String parentId 空串明确表达移根，null 沿用持久父级。
      */
     @Override
     @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.reactiveTransactionManager)
