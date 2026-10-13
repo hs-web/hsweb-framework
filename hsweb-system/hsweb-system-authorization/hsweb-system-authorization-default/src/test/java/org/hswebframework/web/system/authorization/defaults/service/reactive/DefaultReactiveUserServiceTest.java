@@ -3,7 +3,6 @@ package org.hswebframework.web.system.authorization.defaults.service.reactive;
 import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
-import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveUserService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +17,11 @@ import reactor.test.StepVerifier;
 import java.util.function.Supplier;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {ReactiveTestApplication.class, DefaultReactiveUserService.class})
+// 每个测试类使用独立数据库和认证状态，避免 Spring 上下文复用缓存及 H2 默认库跨类共享。
+@SpringBootTest(classes = ReactiveTestApplication.class, properties = {
+        "spring.r2dbc.generate-unique-name=true",
+        "spring.r2dbc.name=DefaultReactiveUserServiceTest"
+})
 public class DefaultReactiveUserServiceTest {
 
     @Autowired
