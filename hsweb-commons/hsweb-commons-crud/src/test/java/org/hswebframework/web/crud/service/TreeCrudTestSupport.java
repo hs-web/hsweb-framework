@@ -2,7 +2,14 @@ package org.hswebframework.web.crud.service;
 
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.crud.entity.TestTreeSortEntity;
+import org.hswebframework.web.crud.events.EntityBeforeCreateEvent;
+import org.hswebframework.web.crud.events.EntityBeforeModifyEvent;
+import org.hswebframework.web.crud.events.EntityBeforeSaveEvent;
+import org.hswebframework.web.crud.events.EntityCreatedEvent;
+import org.hswebframework.web.crud.events.EntityModifyEvent;
+import org.hswebframework.web.crud.events.EntitySavedEvent;
 import org.hswebframework.web.id.IDGenerator;
+import org.springframework.context.event.EventListener;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -15,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -85,6 +93,14 @@ final class TreeCrudTestSupport {
     }
 
     static void assertPersistedTree(Collection<TestTreeSortEntity> nodes, Map<String, String> parents) {
+        Set<String> roots = parents.entrySet().stream().filter(entry -> entry.getValue() == null)
+            .map(Map.Entry::getKey).collect(Collectors.toSet());
+        assertPersistedTree(nodes, parents, roots);
+    }
+
+    /** 根节点由场景明确声明，保留原始 parentId 断言，不借用生产根标记判定。 */
+    static void assertPersistedTree(Collection<TestTreeSortEntity> nodes, Map<String, String> parents,
+                                    Set<String> roots) {
         assertEquals(parents.keySet(), ids(nodes));
         Map<String, TestTreeSortEntity> actual = nodes.stream()
             .collect(Collectors.toMap(TestTreeSortEntity::getId, node -> node));
@@ -92,15 +108,17 @@ final class TreeCrudTestSupport {
             assertEquals(parents.get(node.getId()), node.getParentId());
             int level = 1;
             Set<String> ancestors = new HashSet<>();
-            for (String parent = parents.get(node.getId()); parent != null; parent = parents.get(parent)) {
+            for (String ancestor = node.getId(); !roots.contains(ancestor); ) {
+                String parent = parents.get(ancestor);
                 assertTrue("expected parent is outside the fixture", parents.containsKey(parent));
                 assertTrue("expected graph contains a cycle", ancestors.add(parent));
                 level++;
+                ancestor = parent;
             }
             assertEquals(Integer.valueOf(level), node.getLevel());
             assertNotNull(node.getPath());
             assertEquals(4 + (level - 1) * 5, node.getPath().length());
-            if (node.getParentId() != null) {
+            if (!roots.contains(node.getId())) {
                 TestTreeSortEntity parent = actual.get(node.getParentId());
                 assertTrue(node.getPath().startsWith(parent.getPath() + "-"));
             }
@@ -139,6 +157,74 @@ final class TreeCrudTestSupport {
             }
         }
         throw new AssertionError("missing returned tree node " + id);
+    }
+
+    /** 同步与响应式真实实体事件的执行级快照，操作完成后由测试读取。 */
+    static class EntityEvents {
+        private final Map<String, List<Object>> beforeCreate = new ConcurrentHashMap<>();
+        private final Map<String, List<Object>> created = new ConcurrentHashMap<>();
+        private final Map<String, List<Object>> beforeSave = new ConcurrentHashMap<>();
+        private final Map<String, List<Object>> saved = new ConcurrentHashMap<>();
+        private final Map<String, List<Object>> beforeModify = new ConcurrentHashMap<>();
+        private final Map<String, List<Object>> modified = new ConcurrentHashMap<>();
+
+        public void reset() {
+            beforeCreate.clear();
+            created.clear();
+            beforeSave.clear();
+            saved.clear();
+            beforeModify.clear();
+            modified.clear();
+        }
+
+        public List<Object> getBeforeCreate(String id) { return beforeCreate.get(id); }
+        public List<Object> getCreated(String id) { return created.get(id); }
+        public List<Object> getBeforeSave(String id) { return beforeSave.get(id); }
+        public List<Object> getSaved(String id) { return saved.get(id); }
+        public List<Object> getBeforeModify(String id) { return beforeModify.get(id); }
+        public List<Object> getModified(String id) { return modified.get(id); }
+
+        @EventListener
+        public void beforeCreate(EntityBeforeCreateEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                beforeCreate.putAll(TreeCrudTestSupport.snapshot(event.getEntity()));
+            }
+        }
+
+        @EventListener
+        public void created(EntityCreatedEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                created.putAll(TreeCrudTestSupport.snapshot(event.getEntity()));
+            }
+        }
+
+        @EventListener
+        public void beforeSave(EntityBeforeSaveEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                beforeSave.putAll(TreeCrudTestSupport.snapshot(event.getEntity()));
+            }
+        }
+
+        @EventListener
+        public void saved(EntitySavedEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                saved.putAll(TreeCrudTestSupport.snapshot(event.getEntity()));
+            }
+        }
+
+        @EventListener
+        public void beforeModify(EntityBeforeModifyEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                beforeModify.putAll(TreeCrudTestSupport.snapshot(event.getAfter()));
+            }
+        }
+
+        @EventListener
+        public void modified(EntityModifyEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                modified.putAll(TreeCrudTestSupport.snapshot(event.getAfter()));
+            }
+        }
     }
 
     static final class Forest {

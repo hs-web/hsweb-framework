@@ -82,7 +82,7 @@ public class SyncTreeCrudRegressionTest {
         patch.setName("renamed branch");
         patch.setDefaultTest(branch.getDefaultTest());
 
-        // 此入口继承 save(E) 的普通仓储保存，不把它误当成 save(List) 的树准备路径。
+        // 同步部分 UPDATE 保留原有树关系，此入口不扩展为结构 patch。
         assertEquals(1, service.updateById(branch.getId(), patch));
 
         TestTreeSortEntity after = stored(branch.getId());

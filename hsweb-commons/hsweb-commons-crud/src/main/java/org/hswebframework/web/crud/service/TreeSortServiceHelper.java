@@ -291,6 +291,7 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
         Set<PK> readyToCheck = thisTime
             .values()
             .stream()
+            .filter(value -> !isRootNode(value))
             .map(TreeSupportEntity::getParentId)
             .filter(e -> !ObjectUtils.isEmpty(e) && !allData.containsKey(e))
             .collect(Collectors.toSet());
