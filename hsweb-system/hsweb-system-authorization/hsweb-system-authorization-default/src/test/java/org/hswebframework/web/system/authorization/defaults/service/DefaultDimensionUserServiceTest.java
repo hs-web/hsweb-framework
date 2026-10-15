@@ -1,7 +1,6 @@
 package org.hswebframework.web.system.authorization.defaults.service;
 
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
-import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
 import org.hswebframework.web.system.authorization.api.entity.*;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
@@ -14,13 +13,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.junit.Assert.*;
-
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {
-        ReactiveTestApplication.class,
-        DefaultReactiveUserService.class
-})
+@SpringBootTest(classes = ReactiveTestApplication.class,
+                properties = "spring.r2dbc.generate-unique-name=true")
 public class DefaultDimensionUserServiceTest {
 
     @Autowired

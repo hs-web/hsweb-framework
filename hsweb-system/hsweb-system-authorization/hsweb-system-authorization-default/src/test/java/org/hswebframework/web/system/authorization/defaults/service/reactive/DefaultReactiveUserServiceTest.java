@@ -3,13 +3,11 @@ package org.hswebframework.web.system.authorization.defaults.service.reactive;
 import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
-import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveUserService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -18,7 +16,7 @@ import reactor.test.StepVerifier;
 import java.util.function.Supplier;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {ReactiveTestApplication.class, DefaultReactiveUserService.class})
+@SpringBootTest(classes = ReactiveTestApplication.class)
 public class DefaultReactiveUserServiceTest {
 
     @Autowired

@@ -1,6 +1,7 @@
 package org.hswebframework.web.system.authorization.defaults.service.reactive;
 
 import org.hswebframework.web.crud.configuration.EasyormConfiguration;
+import org.hswebframework.web.crud.configuration.EntityFactoryConfiguration;
 import org.hswebframework.web.crud.configuration.JdbcSqlExecutorConfiguration;
 import org.hswebframework.web.crud.configuration.R2dbcSqlExecutorConfiguration;
 import org.hswebframework.web.system.authorization.defaults.configuration.AuthorizationServiceAutoConfiguration;
@@ -20,11 +21,13 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @RunWith(SpringRunner.class)
-@WebFluxTest(WebFluxPermissionController.class)
+@WebFluxTest(value = WebFluxPermissionController.class,
+            properties = "spring.r2dbc.generate-unique-name=true")
 @ImportAutoConfiguration(value = {
         AuthorizationWebAutoConfiguration.class,
         AuthorizationServiceAutoConfiguration.class,
         EasyormConfiguration.class,
+        EntityFactoryConfiguration.class,
         R2dbcSqlExecutorConfiguration.class, R2dbcAutoConfiguration.class,
         R2dbcTransactionManagerAutoConfiguration.class
 },exclude = {
