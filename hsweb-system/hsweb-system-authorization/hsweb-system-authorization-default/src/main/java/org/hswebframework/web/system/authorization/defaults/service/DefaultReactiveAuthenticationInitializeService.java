@@ -34,6 +34,10 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * 初始化默认系统用户的认证，仅排除禁用的持久用户，构造权限并发布认证初始化事件。
+ * 用户读取与状态准入在同一链路完成，认证缓存由认证管理器负责。
+ */
 @Slf4j
 public class DefaultReactiveAuthenticationInitializeService
     implements ReactiveAuthenticationInitializeService {
@@ -76,29 +80,33 @@ public class DefaultReactiveAuthenticationInitializeService
 
     public Mono<Authentication> doInit(Mono<UserEntity> userEntityMono) {
 
-        return userEntityMono.flatMap(user -> {
-            SimpleAuthentication authentication = new SimpleAuthentication();
-            authentication.setUser(SimpleUser
-                                       .builder()
-                                       .id(user.getId())
-                                       .name(user.getName())
-                                       .username(user.getUsername())
-                                       .userType(user.getType())
-                                       .build());
+        // 权限读取只排除禁用用户；凭据访问另按用户维度中的真实状态准入。
+        return userEntityMono
+            .filter(user -> !Objects.equals(user.getStatus(), UserEntity.STATUS_DISABLED))
+            .flatMap(user -> {
+                SimpleAuthentication authentication = new SimpleAuthentication();
+                authentication.setUser(SimpleUser
+                                           .builder()
+                                           .id(user.getId())
+                                           .name(user.getName())
+                                           .username(user.getUsername())
+                                           .userType(user.getType())
+                                           .options(Collections.singletonMap(UserEntity.OPTION_STATUS, user.getStatus()))
+                                           .build());
 
-            return initPermission(authentication)
-                .defaultIfEmpty(authentication)
-                .onErrorResume(err -> {
-                    log.warn(err.getMessage(), err);
-                    return Mono.just(authentication);
-                })
-                .flatMap(auth -> {
-                    AuthorizationInitializeEvent event = new AuthorizationInitializeEvent(auth);
-                    return event
-                        .publish(eventPublisher)
-                        .then(Mono.fromSupplier(event::getAuthentication));
-                });
-        });
+                return initPermission(authentication)
+                    .defaultIfEmpty(authentication)
+                    .onErrorResume(err -> {
+                        log.warn(err.getMessage(), err);
+                        return Mono.just(authentication);
+                    })
+                    .flatMap(auth -> {
+                        AuthorizationInitializeEvent event = new AuthorizationInitializeEvent(auth);
+                        return event
+                            .publish(eventPublisher)
+                            .then(Mono.fromSupplier(event::getAuthentication));
+                    });
+            });
     }
 
     protected Flux<AuthorizationSettingEntity> getSettings(List<Dimension> dimensions) {

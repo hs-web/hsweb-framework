@@ -20,9 +20,12 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.ReflectionUtils;
 
+import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.RecordComponent;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,7 +46,7 @@ public final class FastBeanCopier {
 
     private static final Map<CacheKey, RecordCopier> RECORD_CACHE = new ConcurrentHashMap<>();
 
-    private static final PropertyUtilsBean propertyUtils = BeanUtilsBean.getInstance().getPropertyUtils();
+    private static final PropertyUtilsBean propertyUtils = new PropertyUtilsBean();
 
     private static final ConvertUtilsBean convertUtils = BeanUtilsBean.getInstance().getConvertUtils();
 
@@ -66,6 +69,37 @@ public final class FastBeanCopier {
     }
 
     static {
+        // 访问器扩展仅作用于 copier，避免改变全局 BeanUtils 的属性规则。
+        propertyUtils.addBeanIntrospector(context -> {
+            Class<?> type = context.getTargetClass();
+            for (Method method : type.getMethods()) {
+                if (Modifier.isStatic(method.getModifiers()) || method.isBridge()) {
+                    continue;
+                }
+                if (method.getName().startsWith("set") && method.getParameterCount() == 1) {
+                    String name = Introspector.decapitalize(method.getName().substring(3));
+                    PropertyDescriptor property = context.getPropertyDescriptor(name);
+                    // 链式 setter 必须与 getter 类型一致，避免重载选择依赖反射方法顺序。
+                    if (property != null
+                        && property.getReadMethod() != null
+                        && property.getWriteMethod() == null
+                        && property.getReadMethod().getReturnType() == method.getParameterTypes()[0]) {
+                        context.addPropertyDescriptor(new PropertyDescriptor(name, property.getReadMethod(), method));
+                    }
+                    continue;
+                }
+                if (method.getParameterCount() != 0
+                    || method.getReturnType() == void.class
+                    || context.hasProperty(method.getName())) {
+                    continue;
+                }
+                // 仅补充同名且类型匹配的 fluent 方法对，保留标准 JavaBean 属性的优先级。
+                Method setter = ClassUtils.getMethodIfAvailable(type, method.getName(), method.getReturnType());
+                if (setter != null && !Modifier.isStatic(setter.getModifiers())) {
+                    context.addPropertyDescriptor(new PropertyDescriptor(method.getName(), method, setter));
+                }
+            }
+        });
         wrapperClassMapping.put(byte.class, Byte.class);
         wrapperClassMapping.put(short.class, Short.class);
         wrapperClassMapping.put(int.class, Integer.class);

@@ -128,6 +128,20 @@ public Mono<String> addAccount(@RequestBody Mono<Account> account){
 
 ```
 
+## 本地响应式缓存失效
+
+`hsweb-concurrent/hsweb-concurrent-cache` 中的 Guava、Caffeine 缓存在
+`evict`、`evictAll` 处理对应 key 时撤销已登记的加载者，`clear` 撤销处理时已有的加载者。
+加载成功时通过现有加载映射在同一 key 的原子操作内校验身份并同步回填。
+已撤销加载者的完成或错误不会回填缓存、移除之后的新加载者或清除其缓存值。
+
+getter 在订阅时才登记加载者并开始缓存读取，避免仅装配 Publisher 就捕获旧值。
+已经开始读取且与 `clear` 重叠的在途请求可以完成原值。`clear` 不是全缓存事务，
+不保证撤销并发产生的新订阅，也不改变调用方默认加载来源的新鲜度。
+
+Redis 的写入是异步远程操作，仍沿用原失效逻辑；上述本地保证不适用于
+Redis 同节点异步写入或跨节点写入与失效。
+
 ## License
 
 [Apache 2.0](https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt)

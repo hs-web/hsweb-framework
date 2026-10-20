@@ -15,6 +15,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import reactor.core.publisher.Mono;
 
+/**
+ * 提供默认用户名密码认证和用户认证缓存。
+ * 按用户 ID 获取认证时委派 initializer，认证来源与准入由 initializer 决定。
+ */
 @Slf4j
 @Order(100)
 public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticationManagerProvider {
@@ -60,7 +64,7 @@ public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticat
                 .filter(PlainTextUsernamePasswordAuthenticationRequest.class::isInstance)
                 .map(PlainTextUsernamePasswordAuthenticationRequest.class::cast)
                 .flatMap(pwdRequest -> reactiveUserService.findByUsernameAndPassword(pwdRequest.getUsername(), pwdRequest.getPassword()))
-                .filter(user -> Byte.valueOf((byte) 1).equals(user.getStatus()))
+                .filter(user -> Byte.valueOf(UserEntity.STATUS_ENABLED).equals(user.getStatus()))
                 .map(UserEntity::getId)
                 .flatMap(this::getByUserId);
     }

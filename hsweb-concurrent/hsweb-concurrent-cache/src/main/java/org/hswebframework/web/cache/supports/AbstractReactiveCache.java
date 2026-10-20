@@ -16,8 +16,13 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+/**
+ * 管理响应式缓存的在途加载与共享结果，存储操作由具体后端实现。
+ * 本地同步后端以加载者身份保护回填和失败清理，不提供异步远程后端的原子保证。
+ */
 @Slf4j
 public abstract class AbstractReactiveCache<E> implements ReactiveCache<E> {
     static final Sinks.EmitFailureHandler emitFailureHandler = Sinks.EmitFailureHandler.busyLooping(Duration.ofSeconds(30));
@@ -58,9 +63,12 @@ public abstract class AbstractReactiveCache<E> implements ReactiveCache<E> {
                     source = source
                         .switchIfEmpty((Mono) defaultValue
                             .flatMap(val -> {
-                                return parent.putNow(key, val).thenReturn(val);
+                                return parent.putLoadedValue(this, val).thenReturn(val);
                             }));
                 }
+                // 在 complete 撤销身份前清理失败，避免旧加载失败误删新加载者或新值。
+                source = source.onErrorResume(err -> parent.handleLoaderError(
+                    key, err, parent.evictLoading(key, this)));
                 loading = source.subscribe(
                     val -> {
                         complete();
@@ -95,11 +103,50 @@ public abstract class AbstractReactiveCache<E> implements ReactiveCache<E> {
 
     public abstract Mono<Void> putNow(Object key, Object value);
 
+    private Mono<Void> putLoadedValue(CacheLoader owner, Object value) {
+        AtomicReference<Mono<Void>> write = new AtomicReference<>(Mono.empty());
+        cacheLoading.computeIfPresent(owner.key, (key, current) -> {
+            if (current == owner) {
+                // 本地缓存同步写入，与同一 key 的失效共用加载映射的原子操作。
+                write.set(putNow(key, value));
+            }
+            return current;
+        });
+        return write.get();
+    }
+
+    protected final void invalidateLoading(Object key, Runnable invalidation) {
+        cacheLoading.compute(key, (_key, current) -> {
+            invalidation.run();
+            return null;
+        });
+    }
+
+    protected final void invalidateLoading(Object key, CacheLoader expected, Runnable invalidation) {
+        cacheLoading.computeIfPresent(key, (_key, current) -> {
+            if (current == expected) {
+                invalidation.run();
+                return null;
+            }
+            return current;
+        });
+    }
+
+    protected final void invalidateAllLoading(Runnable invalidation) {
+        // 撤销处理时已登记的加载者；与 clear 重叠的新订阅不属于全缓存事务。
+        cacheLoading.clear();
+        invalidation.run();
+    }
+
+    private CacheLoader createLoader(Object key) {
+        // 读取也延迟到订阅，不能在装配时捕获失效前的本地值。
+        return new CacheLoader(this, key, Mono.defer(() -> getNow(key)));
+    }
+
     @Override
     @SuppressWarnings("all")
     public final Mono<E> getMono(Object key) {
-        return (Mono<E>) cacheLoading
-            .computeIfAbsent(key, _key -> new CacheLoader(this, _key, getNow(_key)))
+        return Mono.defer(() -> (Mono<E>) cacheLoading.computeIfAbsent(key, this::createLoader))
             .onErrorResume(err -> handleLoaderError(key, err));
     }
 
@@ -110,7 +157,7 @@ public abstract class AbstractReactiveCache<E> implements ReactiveCache<E> {
         return Mono
             .deferContextual(ctx -> {
                 CacheLoader cacheLoader = cacheLoading.compute(key, (_key, old) -> {
-                    CacheLoader cl = new CacheLoader(this, _key, getNow(_key));
+                    CacheLoader cl = createLoader(_key);
                     cl.defaultValue(loader.get(), ctx);
                     return cl;
                 });
@@ -122,8 +169,8 @@ public abstract class AbstractReactiveCache<E> implements ReactiveCache<E> {
 
     @Override
     public final Flux<E> getFlux(Object key) {
-        return (cacheLoading.computeIfAbsent(key, _key -> new CacheLoader(this, _key, getNow(_key))))
-            .flatMapIterable(e -> ((List<E>) e))
+        return Flux.defer(() -> cacheLoading.computeIfAbsent(key, this::createLoader)
+                                           .flatMapIterable(e -> ((List<E>) e)))
             .onErrorResume(err -> handleLoaderError(key, err));
     }
 
@@ -131,7 +178,7 @@ public abstract class AbstractReactiveCache<E> implements ReactiveCache<E> {
     public final Flux<E> getFlux(Object key, Supplier<Flux<E>> loader) {
         return Flux.deferContextual(ctx -> {
                        CacheLoader cacheLoader = cacheLoading.compute(key, (_key, old) -> {
-                           CacheLoader cl = new CacheLoader(this, _key, getNow(_key));
+                           CacheLoader cl = createLoader(_key);
                            cl.defaultValue(loader.get().collectList(), ctx);
                            return cl;
                        });
@@ -141,9 +188,17 @@ public abstract class AbstractReactiveCache<E> implements ReactiveCache<E> {
     }
 
     protected Mono<E> handleLoaderError(Object key, Throwable err) {
-        log.warn("load cache error,key:{},evict it.", key, err);
-        return evict(key)
-            .then(Mono.empty());
+        return handleLoaderError(key, err, evict(key));
+    }
+
+    protected Mono<Void> evictLoading(Object key, CacheLoader owner) {
+        // 异步后端保留原失效逻辑；本地后端在同一原子操作中校验身份和清理。
+        return evict(key);
+    }
+
+    private <V> Mono<V> handleLoaderError(Object key, Throwable err, Mono<Void> cleanup) {
+        log.warn("load cache error,key:{}.", key, err);
+        return cleanup.then(Mono.empty());
     }
 
     @Override

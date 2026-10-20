@@ -36,6 +36,18 @@ import jakarta.validation.constraints.NotBlank;
 @Comment("用户信息")
 public class UserEntity extends ExtendableEntity<String> implements RecordCreationEntity {
 
+    /** 禁用用户，不初始化默认用户权限。 */
+    public static final byte STATUS_DISABLED = 0;
+
+    /** 启用用户，允许默认密码认证。 */
+    public static final byte STATUS_ENABLED = 1;
+
+    /** 锁定用户，保留权限读取，禁止对外凭据访问。 */
+    public static final byte STATUS_LOCKED = 2;
+
+    /** 用户维度 options 中保存真实用户状态的键。 */
+    public static final String OPTION_STATUS = "status";
+
     @Column(length = 128, nullable = false)
     @NotBlank(message = "姓名不能为空", groups = CreateGroup.class)
     @Schema(description = "姓名")
