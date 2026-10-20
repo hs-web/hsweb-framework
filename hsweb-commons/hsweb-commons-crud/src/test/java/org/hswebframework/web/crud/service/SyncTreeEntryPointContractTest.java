@@ -40,7 +40,8 @@ import static org.junit.Assert.*;
 @TestPropertySource(properties = {"easyorm.dialect=h2", "easyorm.default-schema=PUBLIC"})
 public class SyncTreeEntryPointContractTest {
     @Autowired private SyncTreeCrudRegressionTest.JdbcTreeService service;
-    @Autowired private TreeCrudTestSupport.EntityEvents events;
+    @Autowired private MarkerTreeService marked;
+    @Autowired private TreeCrudTestSupport.SaveEvents events;
     @Autowired private RejectedModifyEvents rejectedModify;
 
     @Autowired
@@ -55,6 +56,34 @@ public class SyncTreeEntryPointContractTest {
 
     @Test
     public void listSaveMovesBranchAndRecalculatesOmittedLeaf() { verifySaveMove("list"); }
+
+    @Test
+    public void entitySparseAndFullNullParentSaveKeepExistingRelation() { verifyNullParentSave("entity"); }
+
+    @Test
+    public void collectionSparseAndFullNullParentSaveKeepExistingRelation() { verifyNullParentSave("collection"); }
+
+    @Test
+    public void listSparseAndFullNullParentSaveKeepExistingRelation() { verifyNullParentSave("list"); }
+
+    @Test
+    public void sparseSaveKeepsHistoricalNullRootAndOmittedChild() {
+        String group = IDGenerator.RANDOM.generate();
+        TestTreeSortEntity root = TreeCrudTestSupport.node(group, null, "historical root", 1L);
+        TestTreeSortEntity child = TreeCrudTestSupport.node(group, null, "child", 101L);
+        root.setChildren(List.of(child));
+        service.save(root);
+        Map<String, List<Object>> before = TreeCrudTestSupport.snapshot(stored(group));
+        TestTreeSortEntity input = new TestTreeSortEntity();
+        input.setId(root.getId());
+        input.setName("renamed historical root");
+        input.setDefaultTest(root.getDefaultTest());
+        service.save(input);
+        Map<String, List<Object>> after = TreeCrudTestSupport.snapshot(stored(group));
+        assertNull(after.get(root.getId()).get(0));
+        assertEquals(before.get(root.getId()).subList(0, 3), after.get(root.getId()).subList(0, 3));
+        assertEquals(before.get(child.getId()), after.get(child.getId()));
+    }
 
     @Test
     public void insertMinusOneParentRootKeepsNestedChild() {
@@ -78,7 +107,90 @@ public class SyncTreeEntryPointContractTest {
     }
 
     @Test
-    public void listSaveMinusOneParentMovesExistingBranchAndOmittedLeafToRoot() {
+    public void allSaveEntriesMoveToExplicitRootMarkersWithOmittedLeaf() {
+        for (String entry : List.of("entity", "collection", "list")) {
+            for (String marker : List.of("", "-1")) {
+                verifyRootMove(service, entry, marker);
+            }
+        }
+    }
+
+    @Test
+    public void customRootMarkerUsesExistingServiceExtension() {
+        verifyRootMove(marked, "list", "custom-root");
+    }
+
+    @Test
+    public void nestedSaveParentWinsOverNullRootMarkerAndOldParent() {
+        for (String parentInput : new String[]{null, "", "-1", "missing-parent"}) {
+            String group = IDGenerator.RANDOM.generate();
+            TestTreeSortEntity root = TreeCrudTestSupport.node(group, null, "old root", 1L);
+            TestTreeSortEntity target = TreeCrudTestSupport.node(group, null, "new root", 2L);
+            TestTreeSortEntity branch = TreeCrudTestSupport.node(group, root.getId(), "branch", 101L);
+            TestTreeSortEntity leaf = TreeCrudTestSupport.node(group, branch.getId(), "leaf", 10101L);
+            service.insert(List.of(root, target, branch, leaf));
+            TestTreeSortEntity childInput = service.findById(branch.getId()).orElseThrow(AssertionError::new);
+            childInput.setParentId(parentInput);
+            target.setChildren(List.of(childInput));
+            events.reset();
+            service.save(target);
+            Map<String, String> parents = new LinkedHashMap<>();
+            parents.put(root.getId(), null);
+            parents.put(target.getId(), null);
+            parents.put(branch.getId(), target.getId());
+            parents.put(leaf.getId(), branch.getId());
+            TreeCrudTestSupport.assertPersistedTree(stored(group), parents);
+            assertNoModify(Set.of(target.getId(), branch.getId(), leaf.getId()));
+        }
+    }
+
+    @Test
+    public void explicitRootSavedRejectionAndCallerFailureRollbackAllBatches() {
+        for (String marker : List.of("", "-1")) {
+            for (boolean rejectEvent : List.of(false, true)) {
+                TreeCrudTestSupport.Forest forest = new TreeCrudTestSupport.Forest();
+                service.insert(forest.childFirst());
+                Map<String, List<Object>> before = TreeCrudTestSupport.snapshot(stored(forest.group));
+                TestTreeSortEntity input = service.findById(forest.id("east-left")).orElseThrow(AssertionError::new);
+                input.setParentId(marker);
+                input.setName("renamed moved branch");
+                Set<String> moved = TreeCrudTestSupport.subtree(forest.parents, input.getId());
+                TestTreeSortEntity caller = TreeCrudTestSupport.node(forest.group, null, "caller row", 999L);
+                events.watch(input.getId(), moved, rejectEvent ? forest.id("deep-leaf") : null, caller.getId());
+                try {
+                    IllegalStateException rejection = assertThrows(IllegalStateException.class,
+                        () -> new TransactionTemplate(transactionManager).execute(status -> {
+                            service.insert(caller);
+                            service.getRepository().createUpdate().set("name", "caller changed root")
+                                .where("id", forest.id("east")).execute();
+                            service.save(input);
+                            if (!rejectEvent) {
+                                throw new IllegalStateException("reject caller root marker");
+                            }
+                            return 0;
+                        }));
+                    assertEquals(rejectEvent ? "reject saved root marker" : "reject caller root marker", rejection.getMessage());
+                    assertEquals(before, TreeCrudTestSupport.snapshot(stored(forest.group)));
+                    assertEquals(before.get(input.getId()), events.beforeDatabase);
+                    assertEquals(marker, events.beforeInput.get(0));
+                    assertEquals("renamed moved branch", events.beforeInput.get(3));
+                    assertEquals(marker, events.savedDatabase.get(input.getId()).get(0));
+                    assertEquals("renamed moved branch", events.savedDatabase.get(input.getId()).get(3));
+                    assertEquals(moved, events.savedDatabase.keySet());
+                    assertTrue("the rejection must follow earlier SQL batches", events.savedBatches.size() >= 2);
+                    assertTrue(events.savedBatches.stream().allMatch(batch -> batch.size() <= service.getBufferSize()));
+                    if (rejectEvent) {
+                        assertEquals(TreeCrudTestSupport.snapshot(List.of(caller)).get(caller.getId()), events.callerDatabase);
+                    }
+                    assertNoModify(moved);
+                } finally {
+                    events.reset();
+                }
+            }
+        }
+    }
+
+    private void verifyRootMove(TreeSortEntityService<TestTreeSortEntity, String> saving, String entry, String marker) {
         String group = IDGenerator.RANDOM.generate();
         TestTreeSortEntity root = TreeCrudTestSupport.node(group, null, "root", 1L);
         TestTreeSortEntity branch = TreeCrudTestSupport.node(group, root.getId(), "branch", 101L);
@@ -88,20 +200,77 @@ public class SyncTreeEntryPointContractTest {
         Map<String, List<Object>> business = TreeCrudTestSupport.businessSnapshot(before);
         TestTreeSortEntity moving = service.findById(branch.getId()).orElseThrow(AssertionError::new);
         assertNull(moving.getChildren());
-        moving.setParentId("-1");
-        events.reset();
+        moving.setParentId(marker);
+        moving.setName("renamed branch");
+        business.get(branch.getId()).set(0, moving.getName());
+        events.watch(branch.getId(), Set.of(branch.getId(), leaf.getId()), null, null);
 
-        SaveResult result = service.save(List.of(moving));
+        SaveResult result = save(saving, entry, moving);
 
         List<TestTreeSortEntity> after = stored(group);
         Map<String, String> parents = new LinkedHashMap<>();
         parents.put(root.getId(), null);
-        parents.put(branch.getId(), "-1");
+        parents.put(branch.getId(), marker);
         parents.put(leaf.getId(), branch.getId());
         TreeCrudTestSupport.assertPersistedTree(after, parents, Set.of(root.getId(), branch.getId()));
         assertEquals(business, TreeCrudTestSupport.businessSnapshot(after));
         assertEquals(2, result.getTotal());
         assertSavedSnapshots(after, Set.of(branch.getId(), leaf.getId()));
+        assertEquals("BeforeSave must read the unchanged old database row",
+            TreeCrudTestSupport.snapshot(before).get(branch.getId()), events.beforeDatabase);
+        assertEquals(TreeCrudTestSupport.snapshot(after).get(branch.getId()), events.beforeInput);
+        assertEquals(TreeCrudTestSupport.snapshot(after).get(branch.getId()), events.savedDatabase.get(branch.getId()));
+        assertNoModify(Set.of(branch.getId(), leaf.getId()));
+    }
+
+    private void verifyNullParentSave(String entry) {
+        for (boolean sparse : List.of(false, true)) {
+            String group = IDGenerator.RANDOM.generate();
+            TestTreeSortEntity root = TreeCrudTestSupport.node(group, null, "root", 1L);
+            TestTreeSortEntity branch = TreeCrudTestSupport.node(group, root.getId(), "branch", 101L);
+            TestTreeSortEntity leaf = TreeCrudTestSupport.node(group, branch.getId(), "leaf", 10101L);
+            service.insert(List.of(root, branch, leaf));
+            Map<String, List<Object>> before = TreeCrudTestSupport.snapshot(stored(group));
+            TestTreeSortEntity input = sparse ? new TestTreeSortEntity()
+                : service.findById(branch.getId()).orElseThrow(AssertionError::new);
+            input.setId(branch.getId());
+            input.setParentId(null);
+            input.setName("renamed branch");
+            // Save 仍验证 CreateGroup；合法必填业务列不因父级回归而改变。
+            input.setDefaultTest(branch.getDefaultTest());
+            events.watch(branch.getId(), Set.of(branch.getId()), null, null);
+
+            assertEquals(1, save(service, entry, input).getTotal());
+
+            Map<String, String> parents = new LinkedHashMap<>();
+            parents.put(root.getId(), null);
+            parents.put(branch.getId(), root.getId());
+            parents.put(leaf.getId(), branch.getId());
+            List<TestTreeSortEntity> after = stored(group);
+            TreeCrudTestSupport.assertPersistedTree(after, parents);
+            Map<String, List<Object>> snapshots = TreeCrudTestSupport.snapshot(after);
+            assertEquals(before.get(root.getId()), snapshots.get(root.getId()));
+            assertEquals(before.get(leaf.getId()), snapshots.get(leaf.getId()));
+            assertEquals(before.get(branch.getId()).subList(0, 3), snapshots.get(branch.getId()).subList(0, 3));
+            assertEquals("renamed branch", snapshots.get(branch.getId()).get(3));
+            assertEquals(before.get(branch.getId()), events.beforeDatabase);
+            assertEquals(root.getId(), events.beforeInput.get(0));
+            assertEquals(snapshots.get(branch.getId()), events.savedDatabase.get(branch.getId()));
+            assertNoModify(Set.of(branch.getId(), leaf.getId()));
+            assertNull(events.getBeforeSave(leaf.getId()));
+            events.reset();
+        }
+    }
+
+    private SaveResult save(TreeSortEntityService<TestTreeSortEntity, String> saving, String entry, TestTreeSortEntity input) {
+        switch (entry) {
+            case "entity": return saving.save(input);
+            case "collection":
+                Collection<TestTreeSortEntity> collection = List.of(input);
+                return saving.save(collection);
+            case "list": return saving.save(List.of(input));
+            default: throw new AssertionError(entry);
+        }
     }
 
     @Test
@@ -215,19 +384,7 @@ public class SyncTreeEntryPointContractTest {
         moving.setParentId(newRoot.getId());
         events.reset();
 
-        SaveResult result;
-        switch (entryPoint) {
-            case "entity": result = service.save(moving); break;
-            case "collection":
-                Collection<TestTreeSortEntity> collection = List.of(moving);
-                result = service.save(collection);
-                break;
-            case "list":
-                List<TestTreeSortEntity> list = List.of(moving);
-                result = service.save(list);
-                break;
-            default: throw new AssertionError(entryPoint);
-        }
+        SaveResult result = save(service, entryPoint, moving);
 
         List<TestTreeSortEntity> after = stored(group);
         Map<String, String> parents = new LinkedHashMap<>();
@@ -255,6 +412,22 @@ public class SyncTreeEntryPointContractTest {
         for (String id : savedIds) {
             assertEquals(snapshots.get(id), events.getBeforeSave(id));
             assertEquals(snapshots.get(id), events.getSaved(id));
+        }
+    }
+
+    private void assertNoModify(Set<String> ids) {
+        for (String id : ids) {
+            assertNull("Save must not publish BeforeModify", events.getBeforeModify(id));
+            assertNull("Save must not publish Modify", events.getModified(id));
+        }
+    }
+
+    /** 自定义根标记仍使用同一 JDBC 保存入口和正式事件。 */
+    static class MarkerTreeService extends GenericTreeSupportCrudService<TestTreeSortEntity, String> {
+        @Override public IDGenerator<String> getIDGenerator() { return IDGenerator.MD5; }
+        @Override public void setChildren(TestTreeSortEntity node, List<TestTreeSortEntity> children) { node.setChildren(children); }
+        @Override public boolean isRootNode(TestTreeSortEntity node) {
+            return "custom-root".equals(node.getParentId()) || super.isRootNode(node);
         }
     }
 
@@ -305,8 +478,13 @@ public class SyncTreeEntryPointContractTest {
 
     @Configuration(proxyBeanMethods = false)
     static class EventConfiguration {
-        @Bean TreeCrudTestSupport.EntityEvents syncEntryPointEvents() {
-            return new TreeCrudTestSupport.EntityEvents();
+        @Bean TreeCrudTestSupport.SaveEvents syncEntryPointEvents(SyncRepository<TestTreeSortEntity, String> repository) {
+            return new TreeCrudTestSupport.SaveEvents(id -> Mono.fromSupplier(() ->
+                repository.findById(id).orElseThrow(AssertionError::new)));
+        }
+
+        @Bean MarkerTreeService jdbcMarkerTreeService() {
+            return new MarkerTreeService();
         }
 
         @Bean RejectedModifyEvents syncRejectedModifyEvents(SyncRepository<TestTreeSortEntity, String> repository) {

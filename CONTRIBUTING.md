@@ -50,14 +50,21 @@ before/after/error 共享上下文。干净 CI 使用 easy-orm `4.2` 中包含�
 
 ## 树 Save 与部分更新的契约
 
-树 save 按提交实体的完整树关系保存：已有节点的 `parentId=null` 表示移根，
-共用 helper 维护 path/level 和原有后代；父级清空 SQL 与正式 Modify/Save 事件参与同一
-事务。遗漏 children 不自动删除后代。业务列的 null 仍遵循现有 ORM 忽略 null、生成
-默认值等规则，这一契约不提供整实体的全量 Replace。
+树 Save 和响应式 `updateById` 对已有节点的 `parentId=null` 或缺省沿用持久父级；
+新增节点没有父级时仍为根。显式根标记默认使用空串或 `-1`，由服务现有的
+`isRootNode(E)` 扩展点判定，自定义标记沿用同一规则。历史 `parentId=null` 的根继续
+识别。嵌套 `children` 表达的父子关系优先于子节点自身输入或原持久父级。
+
+共用 helper 只补齐已有 Save 节点未指定的父级，再维护 path/level 和原有后代；
+不把完整 Save 改造成部分更新。遗漏 children 不自动删除后代。业务列的 null 仍遵循
+现有 ORM 忽略 null、生成默认值等规则，这一契约不提供整实体的全量 Replace。
+显式标记与最终业务输入一起通过正式 Save 写入，不先执行父级清空或路径预更新。
+BeforeSave 读取数据库时看到旧父级，同时接收最终准备好的移根及改名输入；Save 不额外
+发布 Modify 事件，Saved 事件拒绝仍回滚整个操作、所有批次及调用方事务中的先前写入。
 
 公开 `PATCH /资源` 是批量 Save/upsert，已有 ID 保存、不存在的 ID 新增；
 `PUT /资源/{id}` 是正式 `updateById` 部分更新入口，null 沿用持久父级和业务字段。
-既有节点的名称等稀疏修改应使用更新入口，完整 Save 必须表达本次需要的树关系。
+既有节点的名称等稀疏修改可省略父级；移根必须明确提交服务识别的非 null 根标记。
 同步树准备覆盖 `insert(Collection)` 及全部 Save 入口，普通同步 `updateById` 不提供
 结构修图；响应式树 `updateById` 维护显式关系变化及遗漏后代的必要树字段。
 
@@ -65,9 +72,9 @@ before/after/error 共享上下文。干净 CI 使用 easy-orm `4.2` 中包含�
 `TreeSortEntityService`、`ReactiveTreeSortEntityService`；公开路由由
 `ReactiveServiceSaveController` 提供。`ExplicitTreeUpdateRegressionTest` 通过真实
 R2DBC H2 / HTTP 和正式实体事件验证 PUT 遗漏或传 null 父级时保留关系，及 PATCH
-完整 null 父级移根、保留遗漏后代和同批不存在 ID 新增。
+显式根标记移根、保留遗漏后代和同批不存在 ID 新增。
 
-根标记 `null`、空串和 `-1` 由 `parentId` 表达；实体自身 ID 为 `-1` 且拥有合法父级时，
+根标记由 `parentId` 表达；实体自身 ID 为 `-1` 且拥有合法父级时，
 仍按普通节点维护。共用 helper 使用服务的根节点判定排除根标记，缺失真实父级和循环
 继续沿用原有拒绝规则。
 
@@ -79,7 +86,8 @@ R2DBC H2 / HTTP 和正式实体事件验证 PUT 遗漏或传 null 父级时保�
 `TreeRootMarkerRegressionTest` 与 `SyncTreeEntryPointContractTest` 使用真实 R2DBC / JDBC
 H2、正式实体事件和共用持久树断言，覆盖根标记、三个同步 Save 入口、缺失/既有目标
 UPDATE，以及正式同步 Modify after 拒绝使完整目标快照及调用方先前写入在原事务中回滚。
-这两个测试类的 15 个用例均通过。
+新增及调整回归同时覆盖三个同步 Save 入口、响应式稀疏 Save、自定义根标记、嵌套父级
+优先级和正式 Save 事件的可见性及回滚；这些回归已纳入下述集中验证。
 
 ## 树 updateById 的业务校验边界
 
@@ -97,11 +105,12 @@ UPDATE，以及正式同步 Modify after 拒绝使完整目标快照及调用方
 Create/Save 共用校验。正式 Modify after 包含持久业务列和完整树字段，child 拒绝前
 读取实际已写父节点，拒绝后原事务恢复整个持久快照。
 
-框架定向集成验证共 17 组、124 个用例：123 通过、1 个既有跳过、0 失败、0 错误；
-跳过项为 `EntityEventListenerTest.testInsertError`。验证期间输入、依赖和执行入口保持
-稳定，结果检查通过。这一结果只覆盖框架选定范围；普通树并发边界见下节。
-以上契约的定向复验入口：
-`mvn -pl hsweb-commons/hsweb-commons-crud -am -Dtest=ExplicitTreeUpdateRegressionTest,SyncTreeCrudRegressionTest,ScopedReactiveTreeSortEntityServiceTest,TreeEntityEventValidationRegressionTest,TreeRootMarkerRegressionTest,SyncTreeEntryPointContractTest -Dsurefire.failIfNoSpecifiedTests=false test`。
+树 Save 根标记变更后的集中 `clean install` 验证通过：24 类、178 项，
+0 失败、0 错误、0 跳过，覆盖真实 JDBC / R2DBC 树回归及认证兼容切片。
+树回归的定向复验入口为：
+`mvn -pl hsweb-commons/hsweb-commons-crud -am '-Dtest=*Tree*Test,PlainCrudTransactionTest,GenericReactiveCacheSupportCrudServiceTest' -Dsurefire.failIfNoSpecifiedTests=false test`。
+该范围包含 Save 事件可见性、跨批 / 调用方事务回滚和纯 UPDATE 兼容。
+普通树并发边界见下节。
 
 ## 普通树删除的并发边界
 

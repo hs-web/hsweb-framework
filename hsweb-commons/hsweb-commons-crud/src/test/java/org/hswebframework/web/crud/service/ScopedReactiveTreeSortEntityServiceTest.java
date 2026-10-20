@@ -278,7 +278,7 @@ public class ScopedReactiveTreeSortEntityServiceTest {
         branch.setChildren(List.of(leaf));
         unscoped.save(root).as(StepVerifier::create).expectNextCount(1).verifyComplete();
         unscoped.findById(branch.getId()).flatMap(existing -> {
-            existing.setParentId(null);
+            existing.setParentId("");
             return unscoped.save(existing);
         }).then(unscoped.queryIncludeChildren(List.of(root.getId())).count())
             .as(StepVerifier::create).expectNext(1L).verifyComplete();
@@ -287,7 +287,7 @@ public class ScopedReactiveTreeSortEntityServiceTest {
                 assertEquals(Set.of(branch.getId(), leaf.getId()), ids(nodes))).verifyComplete();
         Mono.zip(unscoped.findById(branch.getId()), unscoped.findById(leaf.getId()))
             .as(StepVerifier::create).assertNext(nodes -> {
-                assertNull(nodes.getT1().getParentId());
+                assertEquals("", nodes.getT1().getParentId());
                 assertEquals(Integer.valueOf(1), nodes.getT1().getLevel());
                 assertEquals(branch.getId(), nodes.getT2().getParentId());
                 assertEquals(Integer.valueOf(2), nodes.getT2().getLevel());
@@ -298,8 +298,8 @@ public class ScopedReactiveTreeSortEntityServiceTest {
     }
 
     @Test
-    public void explicitRootClearAndTreeSaveRollbackWithEventsAndCallerTransaction() {
-        for (String failure : List.of("modify", "save", "caller")) {
+    public void explicitRootMarkerAndTreeSaveRollbackWithEventsAndCallerTransaction() {
+        for (String failure : List.of("save", "caller")) {
             TestTreeSortEntity root = node(null, null, null);
             TestTreeSortEntity branch = node(null, root.getId(), null);
             branch.setName("reject-root-" + failure + "-" + id());
@@ -310,7 +310,7 @@ public class ScopedReactiveTreeSortEntityServiceTest {
             String branchPath = branch.getPath();
             String leafPath = leaf.getPath();
             Mono<?> move = unscoped.findById(branch.getId()).flatMap(existing -> {
-                existing.setParentId(null);
+                existing.setParentId("");
                 return unscoped.save(existing);
             });
             if ("caller".equals(failure)) {
@@ -460,7 +460,7 @@ public class ScopedReactiveTreeSortEntityServiceTest {
                     .flatMap(pair -> {
                         TestTreeSortEntity moved = pair.getT1();
                         TestTreeSortEntity suppliedChild = pair.getT2();
-                        moved.setParentId(moveToRoot ? null : target.getId());
+                        moved.setParentId(moveToRoot ? "" : target.getId());
                         // 两节点来自数据库，children为空；孙节点必须由持久图加载并随路径修复。
                         assertNull(moved.getChildren());
                         assertNull(suppliedChild.getChildren());
@@ -470,7 +470,7 @@ public class ScopedReactiveTreeSortEntityServiceTest {
                         assertEquals(5, tree.size());
                         assertTreeStructure(tree.values());
                         TestTreeSortEntity moved = tree.get(branch.getId());
-                        assertEquals(moveToRoot ? null : target.getId(), moved.getParentId());
+                        assertEquals(moveToRoot ? "" : target.getId(), moved.getParentId());
                         assertEquals(Integer.valueOf(moveToRoot ? 1 : 2), moved.getLevel());
                         assertEquals(root.getPath(), tree.get(root.getId()).getPath());
                         assertEquals(target.getPath(), tree.get(target.getId()).getPath());
@@ -599,11 +599,11 @@ public class ScopedReactiveTreeSortEntityServiceTest {
             if (subscription == 1) {
                 // 在两次订阅间改变真实持久图，复用Publisher不得沿用第一次helper快照。
                 scoped.findById(branch.getId()).flatMap(existing -> {
-                    existing.setParentId(null);
+                    existing.setParentId("");
                     return scoped.save(existing);
                 }).then(stored(scoped, group)).as(StepVerifier::create).assertNext(tree -> {
                     assertTreeStructure(tree.values());
-                    assertNull(tree.get(branch.getId()).getParentId());
+                    assertEquals("", tree.get(branch.getId()).getParentId());
                     assertEquals(Integer.valueOf(2), tree.get(leaf.getId()).getLevel());
                 }).verifyComplete();
             }
@@ -820,7 +820,7 @@ public class ScopedReactiveTreeSortEntityServiceTest {
         Map<String, TestTreeSortEntity> tree = nodes.stream()
             .collect(Collectors.toMap(TestTreeSortEntity::getId, node -> node));
         for (TestTreeSortEntity node : nodes) {
-            if (node.getParentId() == null) {
+            if (node.getParentId() == null || node.getParentId().isEmpty()) {
                 assertEquals(Integer.valueOf(1), node.getLevel());
             } else {
                 TestTreeSortEntity parent = tree.get(node.getParentId());
@@ -1020,8 +1020,7 @@ public class ScopedReactiveTreeSortEntityServiceTest {
         @EventListener
         public void afterModify(EntityModifyEvent<TestTreeSortEntity> event) {
             if (event.getEntityType() == TestTreeSortEntity.class
-                && event.getAfter().stream().anyMatch(node -> node.getName().startsWith("reject-dsl-")
-                    || (node.getParentId() == null && node.getName().startsWith("reject-root-modify-")))) {
+                && event.getAfter().stream().anyMatch(node -> node.getName().startsWith("reject-dsl-"))) {
                 event.async(Mono.error(new IllegalStateException("reject modified tree")));
             }
         }
@@ -1033,12 +1032,12 @@ public class ScopedReactiveTreeSortEntityServiceTest {
             }
             event.async(completeBatch(event.getEntity()));
             for (TestTreeSortEntity node : event.getEntity()) {
-                if (node.getParentId() == null && node.getName().startsWith("reject-root-save-")) {
+                if ("".equals(node.getParentId()) && node.getName().startsWith("reject-root-save-")) {
                     event.async(Mono.error(new IllegalStateException("reject saved root")));
                 }
-                if (node.getParentId() == null && node.getName().startsWith("verify-root-")) {
+                if ("".equals(node.getParentId()) && node.getName().startsWith("verify-root-")) {
                     event.async(repository.findById(node.getId()).doOnNext(stored -> {
-                        assertNull(stored.getParentId());
+                        assertEquals("", stored.getParentId());
                         assertEquals(node.getPath(), stored.getPath());
                         assertEquals(Integer.valueOf(1), stored.getLevel());
                         observedRoots.incrementAndGet();

@@ -99,13 +99,13 @@ public class SyncTreeCrudRegressionTest {
         TestTreeSortEntity branch = stored(tree.get(1).getId());
         TestTreeSortEntity leaf = stored(tree.get(2).getId());
         assertNull(branch.getChildren());
-        branch.setParentId(null);
+        branch.setParentId("");
 
         assertEquals(2, service.save(List.of(branch)).getTotal());
 
         TestTreeSortEntity moved = stored(branch.getId());
         TestTreeSortEntity movedLeaf = stored(leaf.getId());
-        assertNull("a root path must be committed with a cleared parent ID", moved.getParentId());
+        assertEquals("a root path must be committed with its explicit marker", "", moved.getParentId());
         assertEquals(Integer.valueOf(1), moved.getLevel());
         assertFalse(moved.getPath().contains("-"));
         assertEquals(moved.getId(), movedLeaf.getParentId());
@@ -128,7 +128,7 @@ public class SyncTreeCrudRegressionTest {
             TestTreeSortEntity branch = stored(tree.get(1).getId());
             TestTreeSortEntity leaf = stored(tree.get(2).getId());
             TestTreeSortEntity moved = stored(branch.getId());
-            moved.setParentId(null);
+            moved.setParentId("");
             if ("event".equals(failure)) {
                 events.rejectedId = branch.getId();
             }

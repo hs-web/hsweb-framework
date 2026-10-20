@@ -10,6 +10,8 @@ import org.hswebframework.web.crud.events.EntityModifyEvent;
 import org.hswebframework.web.crud.events.EntitySavedEvent;
 import org.hswebframework.web.id.IDGenerator;
 import org.springframework.context.event.EventListener;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -23,6 +25,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -224,6 +228,79 @@ final class TreeCrudTestSupport {
             if (event.getEntityType() == TestTreeSortEntity.class) {
                 modified.putAll(TreeCrudTestSupport.snapshot(event.getAfter()));
             }
+        }
+    }
+
+    /** 在正式 Save 事件中通过真实仓储读取同一事务，分别观察旧库状态与最终输入。 */
+    static class SaveEvents extends EntityEvents {
+        private final Function<String, Mono<TestTreeSortEntity>> findById;
+        private String targetId;
+        private Set<String> watchedIds = Set.of();
+        private String rejectedId;
+        private String callerId;
+        List<Object> beforeDatabase;
+        List<Object> beforeInput;
+        List<Object> callerDatabase;
+        final Map<String, List<Object>> savedDatabase = new ConcurrentHashMap<>();
+        final List<List<String>> savedBatches = new CopyOnWriteArrayList<>();
+
+        SaveEvents(Function<String, Mono<TestTreeSortEntity>> findById) {
+            this.findById = findById;
+        }
+
+        void watch(String targetId, Set<String> watchedIds, String rejectedId, String callerId) {
+            reset();
+            this.targetId = targetId;
+            this.watchedIds = watchedIds;
+            this.rejectedId = rejectedId;
+            this.callerId = callerId;
+        }
+
+        @Override
+        public void reset() {
+            super.reset();
+            targetId = null;
+            watchedIds = Set.of();
+            rejectedId = null;
+            callerId = null;
+            beforeDatabase = null;
+            beforeInput = null;
+            callerDatabase = null;
+            savedDatabase.clear();
+            savedBatches.clear();
+        }
+
+        @EventListener
+        public void inspectBeforeSave(EntityBeforeSaveEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class && targetId != null
+                && event.getEntity().stream().anyMatch(node -> targetId.equals(node.getId()))) {
+                beforeInput = snapshot(event.getEntity()).get(targetId);
+                event.async(findById.apply(targetId).doOnNext(stored ->
+                    beforeDatabase = snapshot(List.of(stored)).get(targetId)).then());
+            }
+        }
+
+        @EventListener
+        public void inspectSaved(EntitySavedEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() != TestTreeSortEntity.class) {
+                return;
+            }
+            List<String> ids = event.getEntity().stream().map(TestTreeSortEntity::getId)
+                .filter(watchedIds::contains).collect(Collectors.toList());
+            if (ids.isEmpty()) {
+                return;
+            }
+            savedBatches.add(ids);
+            Mono<Void> inspection = Flux.fromIterable(ids).concatMap(findById)
+                .doOnNext(stored -> savedDatabase.putAll(snapshot(List.of(stored)))).then();
+            if (ids.contains(rejectedId)) {
+                if (callerId != null) {
+                    inspection = inspection.then(findById.apply(callerId).doOnNext(stored ->
+                        callerDatabase = snapshot(List.of(stored)).get(callerId)).then());
+                }
+                inspection = inspection.then(Mono.error(new IllegalStateException("reject saved root marker")));
+            }
+            event.async(inspection);
         }
     }
 

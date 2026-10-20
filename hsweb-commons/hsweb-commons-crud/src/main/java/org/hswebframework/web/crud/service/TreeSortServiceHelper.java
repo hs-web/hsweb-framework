@@ -20,6 +20,11 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * 为同步及响应式树写入准备父子关系与路径；每次操作创建独立实例。
+ * Save 只补齐已有节点未指定的父级，部分 UPDATE 另外维护稀疏业务输入。
+ * 根标记委派服务的 isRootNode，准备阶段不执行持久化写入。
+ */
 public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>, PK> {
 
     //包含子节点的数据
@@ -169,6 +174,14 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
 
                 if (partialUpdate) {
                     completeUpdateInput();
+                } else {
+                    // null 不表达移根；嵌套 children 已在展开时赋予明确父级，优先保留。
+                    thisTime.values().forEach(node -> {
+                        E previous = oldData.get(node.getId());
+                        if (node.getParentId() == null && previous != null) {
+                            node.setParentId(previous.getParentId());
+                        }
+                    });
                 }
                 readyToSave.putAll(thisTime);
 
@@ -242,13 +255,6 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
         prepared.setPath(saved.getPath());
         prepared.setLevel(saved.getLevel());
         refactorChildPath(saved.getId(), saved.getPath(), this::refactor);
-    }
-
-    /** 当前完整保存明确移根，且原持久化节点具有父级。 */
-    protected boolean isMovingToRoot(E node) {
-        E previous = oldData.get(node.getId());
-        return node.getParentId() == null && previous != null
-            && !ObjectUtils.isEmpty(previous.getParentId());
     }
 
     private void initChildren() {

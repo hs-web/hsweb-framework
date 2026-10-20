@@ -22,7 +22,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * 树形结构的通用增删改查服务
+ * 响应式树 CRUD，Save 准备关系与遗漏后代后通过正式仓储 Save 写入。
+ * null 父级沿用已有关系，显式根标记由 isRootNode 判定；UPDATE 保持正式 Modify 事件。
+ * 每次订阅独立准备树快照，复合操作及全部批次共享事务。
  *
  * @param <E> TreeSortSupportEntity
  * @param <K> ID
@@ -205,7 +207,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     }
 
     /**
-     * 按提交实体保存完整树关系，已有节点的 null parentId 表示移根。
+     * 保存树关系，已有节点的 null parentId 沿用持久父级；显式根标记表达移根。
      * 遗漏 children 不自动删除后代；业务列的 null 沿用 ORM 保存规则。
      */
     @Override
@@ -217,17 +219,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
             ReactiveTreeSortServiceHelper<E, K> helper = new ReactiveTreeSortServiceHelper<>(this);
             return helper.prepare(Flux.from(entityPublisher))
                 .buffer(getBufferSize())
-                .concatMap(batch -> Flux.fromIterable(batch)
-                    .filter(helper::isMovingToRoot)
-                    // ORM save 忽略普通 null；仅既有节点显式移根时，在原 save 前清空父级。
-                    // 同时写入已准备的 path/level，modify 与随后的 save 事件共享原事务。
-                    .concatMap(node -> getRepository().createUpdate()
-                        .set("path", node.getPath())
-                        .set("level", node.getLevel())
-                        .setNull("parentId")
-                        .where("id", node.getId())
-                        .execute())
-                    .then(getRepository().save(batch)))
+                .concatMap(getRepository()::save)
                 .reduce(SaveResult::merge);
         });
         return TransactionUtils.tryRunInTransaction(operation, new DefaultTransactionDefinition());
@@ -257,7 +249,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
      * 业务更新规则应监听 {@link EntityBeforeModifyEvent} 的 after；save(Publisher) 覆写只拥有 Save 入口。
      * 新 child 经过服务 save，使用对应的 BeforeSave/BeforeCreate 规则；任一拒绝回滚整个树更新。
      * 目标并发消失时返回零，不使用 Save/UPSERT 重建目标，也不继续写入 children。
-     * String parentId 空串明确表达移根，null 沿用持久父级。
+     * 非 null 的根标记由 isRootNode 判定，null 沿用持久父级。
      */
     @Override
     @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.reactiveTransactionManager)

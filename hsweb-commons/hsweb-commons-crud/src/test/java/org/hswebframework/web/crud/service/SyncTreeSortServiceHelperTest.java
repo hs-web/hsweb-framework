@@ -55,7 +55,7 @@ public class SyncTreeSortServiceHelperTest {
                 });
                 TestTreeSortEntity moved = copy(branch);
                 TestTreeSortEntity suppliedChild = copy(child);
-                moved.setParentId(moveToRoot ? null : target.getId());
+                moved.setParentId(moveToRoot ? "" : target.getId());
                 List<TestTreeSortEntity> prepared = new SyncTreeSortServiceHelper<>(service)
                     .prepare(childFirst ? List.of(suppliedChild, moved) : List.of(moved, suppliedChild));
                 Map<String, TestTreeSortEntity> actual = prepared.stream()
@@ -64,7 +64,7 @@ public class SyncTreeSortServiceHelperTest {
                 TestTreeSortEntity actualBranch = actual.get(branch.getId());
                 TestTreeSortEntity actualChild = actual.get(child.getId());
                 TestTreeSortEntity actualGrandchild = actual.get(grandchild.getId());
-                assertEquals(moveToRoot ? null : target.getId(), actualBranch.getParentId());
+                assertEquals(moveToRoot ? "" : target.getId(), actualBranch.getParentId());
                 assertEquals(Integer.valueOf(moveToRoot ? 1 : 2), actualBranch.getLevel());
                 assertTrue(actualChild.getPath().startsWith(actualBranch.getPath() + "-"));
                 assertTrue(actualGrandchild.getPath().startsWith(actualChild.getPath() + "-"));

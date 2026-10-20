@@ -18,6 +18,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
+ * 同步树 CRUD，Save 准备关系与遗漏后代后通过正式仓储 Save 写入。
+ * null 父级沿用已有关系，显式移根标记由 isRootNode 判定；普通 UPDATE 不重算树。
+ * 所有批次和实体事件参与业务调用方的 JDBC 事务。
+ *
  * @param <E> TreeSortSupportEntity
  * @param <K> ID
  * @see GenericReactiveTreeSupportCrudService
@@ -97,7 +101,7 @@ public interface TreeSortEntityService<E extends TreeSortSupportEntity<K>, K>
     }
 
     /**
-     * 按提交实体保存完整树关系，已有节点的 null parentId 表示移根。
+     * 保存树关系，已有节点的 null parentId 沿用持久父级；显式根标记表达移根。
      * 遗漏 children 不自动删除后代；业务列的 null 沿用 ORM 保存规则。
      */
     @Override
@@ -107,20 +111,7 @@ public interface TreeSortEntityService<E extends TreeSortSupportEntity<K>, K>
         return helper
             .prepare(Flux.fromIterable(entities))
             .buffer(getBufferSize())
-            .map(batch -> {
-                for (E node : batch) {
-                    if (helper.isMovingToRoot(node)) {
-                        // ORM save 忽略普通 null；显式移根与随后保存的路径、实体事件共享原事务。
-                        getRepository().createUpdate()
-                            .set("path", node.getPath())
-                            .set("level", node.getLevel())
-                            .setNull("parentId")
-                            .where("id", node.getId())
-                            .execute();
-                    }
-                }
-                return getRepository().save(batch);
-            })
+            .map(getRepository()::save)
             .reduce(SaveResult::merge)
             .blockOptional()
             .orElse(SaveResult.of(0,0));

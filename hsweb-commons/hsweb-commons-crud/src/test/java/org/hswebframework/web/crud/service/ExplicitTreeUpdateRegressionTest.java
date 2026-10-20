@@ -167,7 +167,7 @@ public class ExplicitTreeUpdateRegressionTest {
     }
 
     @Test
-    public void publicPatchFullNullParentMovesSubtreeAndCreatesMissingId() {
+    public void publicPatchExplicitRootMarkerMovesSubtreeAndCreatesMissingId() {
         TestTreeSortEntity root = node("root-before");
         TestTreeSortEntity child = node("child-before");
         TestTreeSortEntity leaf = node("leaf-before");
@@ -181,7 +181,7 @@ public class ExplicitTreeUpdateRegressionTest {
             .block(TIMEOUT);
         Map<String, List<Object>> beforeSnapshot = TreeCrudTestSupport.snapshot(before.values());
         TestTreeSortEntity complete = before.get(child.getId());
-        complete.setParentId(null);
+        complete.setParentId("");
         complete.setName("moved-root");
         TestTreeSortEntity added = node("http-created-root");
         service.findById(added.getId()).as(StepVerifier::create).verifyComplete();
@@ -196,7 +196,7 @@ public class ExplicitTreeUpdateRegressionTest {
                 TestTreeSortEntity moved = after.get(child.getId());
                 TestTreeSortEntity movedLeaf = after.get(leaf.getId());
                 TestTreeSortEntity created = after.get(added.getId());
-                assertNull(moved.getParentId());
+                assertEquals("", moved.getParentId());
                 assertEquals("moved-root", moved.getName());
                 assertEquals("business-before", moved.getDefaultTest());
                 assertEquals(Long.valueOf(37), moved.getSortIndex());
@@ -221,11 +221,8 @@ public class ExplicitTreeUpdateRegressionTest {
                     assertEquals(afterSnapshot.get(id), httpEvents.getSaved(id));
                 }
                 assertNull(httpEvents.getBeforeSave(root.getId()));
-                assertNotNull("root clear retains the formal Modify boundary", httpEvents.getModified(child.getId()));
-                assertNull(httpEvents.getBeforeModify(child.getId()).get(0));
-                assertNull(httpEvents.getModified(child.getId()).get(0));
-                assertEquals(moved.getPath(), httpEvents.getModified(child.getId()).get(1));
-                assertEquals(Integer.valueOf(1), httpEvents.getModified(child.getId()).get(2));
+                assertNull("Save must not add a Modify boundary", httpEvents.getModified(child.getId()));
+                assertNull(httpEvents.getBeforeModify(child.getId()));
             }).expectComplete().verify(TIMEOUT);
         service.queryIncludeChildren(List.of(root.getId())).count()
             .as(StepVerifier::create).expectNext(1L).verifyComplete();
