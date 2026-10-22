@@ -1,25 +1,27 @@
 package org.hswebframework.web.crud.service;
 
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
-import org.hswebframework.utils.RandomUtil;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.api.crud.entity.TransactionManagers;
 import org.hswebframework.web.api.crud.entity.TreeSortSupportEntity;
 import org.hswebframework.web.api.crud.entity.TreeSupportEntity;
 import org.hswebframework.web.id.IDGenerator;
-import org.reactivestreams.Publisher;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
+ * 同步树 CRUD，Save 准备关系与遗漏后代后通过正式仓储 Save 写入。
+ * null 父级沿用已有关系，显式移根标记由 isRootNode 判定；普通 UPDATE 不重算树。
+ * 所有批次和实体事件参与业务调用方的 JDBC 事务。
+ *
  * @param <E> TreeSortSupportEntity
  * @param <K> ID
  * @see GenericReactiveTreeSupportCrudService
@@ -88,21 +90,42 @@ public interface TreeSortEntityService<E extends TreeSortSupportEntity<K>, K>
 
     @Override
     @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.jdbcTransactionManager)
+    default SaveResult save(E entity) {
+        return save(Collections.singletonList(entity));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.jdbcTransactionManager)
+    default SaveResult save(Collection<E> entities) {
+        return save(new ArrayList<>(entities));
+    }
+
+    /**
+     * 保存树关系，已有节点的 null parentId 沿用持久父级；显式根标记表达移根。
+     * 遗漏 children 不自动删除后代；业务列的 null 沿用 ORM 保存规则。
+     */
+    @Override
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.jdbcTransactionManager)
     default SaveResult save(List<E> entities) {
-        return new SyncTreeSortServiceHelper<>(this)
+        SyncTreeSortServiceHelper<E, K> helper = new SyncTreeSortServiceHelper<>(this);
+        return helper
             .prepare(Flux.fromIterable(entities))
             .buffer(getBufferSize())
-            .map(this.getRepository()::save)
+            .map(getRepository()::save)
             .reduce(SaveResult::merge)
             .blockOptional()
             .orElse(SaveResult.of(0,0));
     }
 
+    /**
+     * 仅更新已有目标，通过正式 Modify 实体事件执行业务校验，缺失目标返回零。
+     * 不重算树关系；树关系变更应通过完整 Save 提交。
+     */
     @Override
     @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.jdbcTransactionManager)
     default int updateById(K id, E entity) {
         entity.setId(id);
-        return this.save(entity).getTotal();
+        return getRepository().updateById(id, entity);
     }
 
     @Override

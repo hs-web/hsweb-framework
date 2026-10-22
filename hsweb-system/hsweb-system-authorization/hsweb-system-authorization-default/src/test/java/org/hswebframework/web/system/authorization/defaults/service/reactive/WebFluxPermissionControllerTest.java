@@ -21,8 +21,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @RunWith(SpringRunner.class)
-@WebFluxTest(value = WebFluxPermissionController.class,
-            properties = "spring.r2dbc.generate-unique-name=true")
+// 每个测试类使用独立数据库和认证状态，避免 Spring 上下文复用缓存及 H2 默认库跨类共享。
+@WebFluxTest(controllers = WebFluxPermissionController.class, properties = {
+        "spring.r2dbc.generate-unique-name=true",
+        "spring.r2dbc.name=WebFluxPermissionControllerTest"
+})
 @ImportAutoConfiguration(value = {
         AuthorizationWebAutoConfiguration.class,
         AuthorizationServiceAutoConfiguration.class,

@@ -1,32 +1,30 @@
 package org.hswebframework.web.crud.service;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.hswebframework.ezorm.core.MethodReferenceColumn;
-import org.hswebframework.ezorm.core.StaticMethodReferenceColumn;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
+import org.hswebframework.ezorm.rdb.mapping.ReactiveQuery;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.ezorm.rdb.operator.dml.Terms;
-import org.hswebframework.utils.RandomUtil;
 import org.hswebframework.web.api.crud.entity.*;
-import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.id.IDGenerator;
-import org.hswebframework.web.validator.CreateGroup;
+import org.hswebframework.web.crud.events.EntityBeforeModifyEvent;
+import org.hswebframework.web.crud.utils.TransactionUtils;
 import org.reactivestreams.Publisher;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.math.MathFlux;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
- * 树形结构的通用增删改查服务
+ * 响应式树 CRUD，Save 准备关系与遗漏后代后通过正式仓储 Save 写入。
+ * null 父级沿用已有关系，显式根标记由 isRootNode 判定；UPDATE 保持正式 Modify 事件。
+ * 每次订阅独立准备树快照，复合操作及全部批次共享事务。
  *
  * @param <E> TreeSortSupportEntity
  * @param <K> ID
@@ -95,16 +93,12 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
      */
     @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     default Flux<E> queryIncludeChildren(Flux<E> entities) {
-        Set<String> duplicateCheck = new HashSet<>();
         return entities
-            .concatMap(e -> !StringUtils.hasText(e.getPath()) || !duplicateCheck.add(e.getPath())
-                           ? Mono.just(e)
-                           : createQuery()
-                           .where()
-                           //使用path快速查询
-                           .like$("path", e.getPath())
-                           .fetch(),
-                       Integer.MAX_VALUE)
+            .concatMap(e -> !StringUtils.hasText(e.getPath())
+                ? Mono.just(e)
+                : applyTreeScope(e, createQuery())
+                    .like$("path", e.getPath())
+                    .fetch(), Integer.MAX_VALUE)
             .distinct(TreeSupportEntity::getId);
     }
 
@@ -128,18 +122,14 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
      */
     @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     default Flux<E> queryIncludeParent(Flux<E> entities) {
-        Set<String> duplicateCheck = new HashSet<>();
-
         return entities
-            .concatMap(e -> !StringUtils.hasText(e.getPath()) || !duplicateCheck.add(e.getPath())
+            .concatMap(e -> !StringUtils.hasText(e.getPath())
                 ? Mono.just(e)
-                : createQuery()
-                .where()
-                //where ? like path and path !='' and path not null
-                .accept(Terms.Like.reversal("path", e.getPath(), false, true))
-                .notEmpty("path")
-                .notNull("path")
-                .fetch(), Integer.MAX_VALUE)
+                : applyTreeScope(e, createQuery())
+                    .accept(Terms.Like.reversal("path", e.getPath(), false, true))
+                    .notEmpty("path")
+                    .notNull("path")
+                    .fetch(), Integer.MAX_VALUE)
             .distinct(TreeSupportEntity::getId);
     }
 
@@ -151,26 +141,38 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
      */
     @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     default Flux<E> queryIncludeChildren(QueryParamEntity queryParam) {
-        Set<String> duplicateCheck = new HashSet<>();
+        QueryParamEntity seeds = queryParam.clone();
+        seeds.setIncludes(new HashSet<>());
+        seeds.setExcludes(new HashSet<>());
+        // 分组与去重必须使用完整内部节点，调用方的投影只应用于最终输出。
+        Flux<E> fullNodes = queryIncludeChildren(query(seeds));
+        if (queryParam.getIncludes().isEmpty() && queryParam.getExcludes().isEmpty()) {
+            return fullNodes;
+        }
+        return fullNodes.map(TreeSupportEntity::getId).buffer(getBufferSize())
+            .concatMap(ids -> createQuery().in("id", ids).as(q -> {
+                if (CollectionUtils.isNotEmpty(queryParam.getIncludes())) {
+                    q.select(queryParam.getIncludes().toArray(new String[0]));
+                }
+                if (CollectionUtils.isNotEmpty(queryParam.getExcludes())) {
+                    q.selectExcludes(queryParam.getExcludes().toArray(new String[0]));
+                }
+                return q;
+            }).fetch());
+    }
 
-        return query(queryParam)
-            .concatMap(e -> !StringUtils.hasText(e.getPath()) || !duplicateCheck.add(e.getPath())
-                           ? Mono.just(e)
-                           : createQuery()
-                           .as(q -> {
-                               if (CollectionUtils.isNotEmpty(queryParam.getIncludes())) {
-                                   q.select(queryParam.getIncludes().toArray(new String[0]));
-                               }
-                               if (CollectionUtils.isNotEmpty(queryParam.getExcludes())) {
-                                   q.selectExcludes(queryParam.getExcludes().toArray(new String[0]));
-                               }
-                               return q;
-                           })
-                           .where()
-                           .like$("path", e.getPath())
-                           .fetch()
-                , Integer.MAX_VALUE)
-            .distinct(TreeSupportEntity::getId);
+    /**
+     * 为同一数据表中的独立树追加分组条件，祖先、子树查询及子树删除统一使用此扩展点。
+     * 默认不追加条件，保持已有单树服务的行为。分组实现应只追加条件，不修改实体或执行查询；
+     * 传入实体必须包含分组字段，不能仅依靠随机 path 判断归属。
+     *
+     * @param node 当前树节点
+     * @param query 已创建的查询
+     * @return 追加同组约束后的查询
+     * @since 5.0.2
+     */
+    default ReactiveQuery<E> applyTreeScope(E node, ReactiveQuery<E> query) {
+        return query;
     }
 
     @Override
@@ -188,29 +190,39 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     @Override
     @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
-        return this
-            .getRepository()
-            .insertBatch(new ReactiveTreeSortServiceHelper<>(this)
-                             .prepare(Flux.from(entityPublisher)
-                                          .flatMapIterable(Function.identity()))
-                             //  .doOnNext(e -> e.tryValidate(CreateGroup.class))
-                             .buffer(getBufferSize()));
+        Mono<Integer> operation = Mono.defer(() -> {
+            // 每次订阅独立准备；前一批 SQL 和异步实体事件完成后，才处理下一批。
+            ReactiveTreeSortServiceHelper<E, K> helper = new ReactiveTreeSortServiceHelper<>(this);
+            return helper.prepare(Flux.from(entityPublisher).flatMapIterable(Function.identity()))
+                .buffer(getBufferSize())
+                .concatMap(batch -> getRepository().insertBatch(Mono.just(batch)))
+                .reduce(Math::addExact)
+                .defaultIfEmpty(0);
+        });
+        return TransactionUtils.tryRunInTransaction(operation, new DefaultTransactionDefinition());
     }
 
     default int getBufferSize() {
         return 200;
     }
 
+    /**
+     * 保存树关系，已有节点的 null parentId 沿用持久父级；显式根标记表达移根。
+     * 遗漏 children 不自动删除后代；业务列的 null 沿用 ORM 保存规则。
+     */
     @Override
     @Transactional(rollbackFor = Throwable.class,
         transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<SaveResult> save(Publisher<E> entityPublisher) {
-        return new ReactiveTreeSortServiceHelper<>(this)
-            .prepare(Flux.from(entityPublisher))
-//                .doOnNext(e -> e.tryValidate(CreateGroup.class))
-            .buffer(getBufferSize())
-            .concatMap(this.getRepository()::save)
-            .reduce(SaveResult::merge);
+        Mono<SaveResult> operation = Mono.defer(() -> {
+            // 每次订阅独立准备树快照；helper 不在服务单例或重复订阅之间共享。
+            ReactiveTreeSortServiceHelper<E, K> helper = new ReactiveTreeSortServiceHelper<>(this);
+            return helper.prepare(Flux.from(entityPublisher))
+                .buffer(getBufferSize())
+                .concatMap(getRepository()::save)
+                .reduce(SaveResult::merge);
+        });
+        return TransactionUtils.tryRunInTransaction(operation, new DefaultTransactionDefinition());
 
     }
 
@@ -231,16 +243,58 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
         return save(Flux.just(data));
     }
 
+    /**
+     * 部分更新忽略 null；显式 children 参与修改和新增，遗漏后代仅维护树字段。
+     * 目标及显式已有 child 始终执行 UPDATE，通过 ORM Modify 完整 before/after 事件校验。
+     * 业务更新规则应监听 {@link EntityBeforeModifyEvent} 的 after；save(Publisher) 覆写只拥有 Save 入口。
+     * 新 child 经过服务 save，使用对应的 BeforeSave/BeforeCreate 规则；任一拒绝回滚整个树更新。
+     * 目标并发消失时返回零，不使用 Save/UPSERT 重建目标，也不继续写入 children。
+     * 非 null 的根标记由 isRootNode 判定，null 沿用持久父级。
+     */
+    @Override
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.reactiveTransactionManager)
+    default Mono<Integer> updateById(K id, Mono<E> entityPublisher) {
+        Mono<Integer> operation = entityPublisher.flatMap(data -> findById(id).flatMap(existing -> {
+            data.setId(id);
+            ReactiveTreeSortServiceHelper<E, K> helper = new ReactiveTreeSortServiceHelper<>(this);
+            return helper.prepareUpdate(Flux.just(data))
+                .collectList()
+                .flatMap(nodes -> getRepository().updateById(id, helper.getUpdateData(data))
+                    .flatMap(updated -> {
+                        // 目标始终是 UPDATE；并发删除导致零修改时，不能新增目标或继续写 children。
+                        if (updated == 0) {
+                            return Mono.just(0);
+                        }
+                        return Flux.fromIterable(nodes)
+                            .filter(node -> !Objects.equals(id, node.getId()))
+                            .concatMap(node -> {
+                                E patch = helper.getUpdateData(node);
+                                if (patch != null) {
+                                    if (helper.isNewNode(node)) {
+                                        // 保留业务 save 扩展，再按实际持久路径维护尚未写入的后代。
+                                        return save(patch).flatMap(result -> getRepository().findById(patch.getId())
+                                            .doOnNext(helper::updateSavedNodePath)
+                                            .thenReturn(result.getTotal()));
+                                    }
+                                    // 不把完整快照回写，避免覆盖其他事务修改的独立业务字段。
+                                    return getRepository().updateById(node.getId(), patch);
+                                }
+                                return getRepository().createUpdate()
+                                    .set("path", node.getPath())
+                                    .set("level", node.getLevel())
+                                    .where("id", node.getId())
+                                    .execute();
+                            })
+                            .reduce(updated, Math::addExact);
+                    }));
+        })).defaultIfEmpty(0);
+        return TransactionUtils.tryRunInTransaction(operation, new DefaultTransactionDefinition());
+    }
+
     @Override
     @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
-    default Mono<Integer> updateById(K id, Mono<E> entityPublisher) {
-        return this
-            .findById(id)
-            .map(e -> this
-                .save(entityPublisher.doOnNext(data -> data.setId(id)))
-                .map(SaveResult::getTotal))
-            .defaultIfEmpty(Mono.just(0))
-            .flatMap(Function.identity());
+    default Mono<Integer> updateById(K id, E entity) {
+        return updateById(id, Mono.just(entity));
     }
 
     @Override
@@ -252,12 +306,9 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     @Override
     @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> deleteById(Publisher<K> idPublisher) {
-        return this
-            .findById(Flux.from(idPublisher))
-            .concatMap(e -> StringUtils.hasText(e.getPath())
-                ? getRepository().createDelete().where().like$(e::getPath).execute()
-                : getRepository().deleteById(e.getId()), Integer.MAX_VALUE)
-            .as(MathFlux::sumInt);
+        return Flux.from(idPublisher).collectList().flatMap(ids -> ids.isEmpty()
+            ? Mono.just(0)
+            : createDelete().in("id", ids).execute());
     }
 
     IDGenerator<K> getIDGenerator();
@@ -279,25 +330,38 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     }
 
     default boolean isRootNode(E entity) {
-        return ObjectUtils.isEmpty(entity.getParentId()) || "-1".equals(String.valueOf(entity.getId()));
+        return ObjectUtils.isEmpty(entity.getParentId()) || "-1".equals(String.valueOf(entity.getParentId()));
+    }
+
+    /**
+     * 在当前树删除事务内准备删除条件，完成后才读取当前节点及子树。
+     * 默认不执行任何操作；扩展实现不应修改查询参数或提前展开子树。
+     *
+     * @param queryParam 原始删除条件
+     * @return 准备完成信号
+     */
+    default Mono<Void> prepareTreeDelete(QueryParamEntity queryParam) {
+        return Mono.empty();
     }
 
     @Override
-    @SuppressWarnings("all")
     default ReactiveDelete createDelete() {
-        return ReactiveCrudService.super
-            .createDelete()
-            .onExecute((delete, executor) -> this
-                .queryIncludeChildren(delete.toQueryParam(QueryParamEntity::new)
-                                            .<QueryParamEntity>includes("id", "path", "parentId"))
-                .map(TreeSupportEntity::getId)
-                .buffer(200)
-                .concatMap(list -> getRepository()
-                    .createDelete()
-                    .where()
-                    .in("id", list)
-                    .execute(), Integer.MAX_VALUE)
-                //.concatWith(executor)
-                .reduce(0, Math::addExact));
+        return ReactiveCrudService.super.createDelete().onExecute((delete, executor) ->
+            TransactionUtils.tryRunInTransaction(
+                // 完整实体用于分组和层级排序；叶先有界分片，每批SQL与事件完成后才删除父级。
+                // 全部批次仍参与同一个原事务，后批事件或调用方失败必须整体回滚。
+                Mono.defer(() -> {
+                    QueryParamEntity queryParam = delete.toQueryParam(QueryParamEntity::new);
+                    return prepareTreeDelete(queryParam)
+                        .thenMany(Flux.defer(() -> queryIncludeChildren(queryParam)))
+                        .sort(Comparator.comparing((E node) -> node.getLevel(),
+                                                   Comparator.nullsFirst(Comparator.naturalOrder())).reversed())
+                        .map(TreeSupportEntity::getId)
+                        .buffer(getBufferSize())
+                        .concatMap(ids -> getRepository().createDelete().in("id", ids).execute())
+                        .reduce(Math::addExact)
+                        .defaultIfEmpty(0);
+                }),
+                new DefaultTransactionDefinition()));
     }
 }
