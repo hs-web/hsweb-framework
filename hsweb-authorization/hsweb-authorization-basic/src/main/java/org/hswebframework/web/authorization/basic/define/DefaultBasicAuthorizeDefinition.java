@@ -73,6 +73,10 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
             getResources().clear();
             getDimensions().clear();
         }
+        // DEFAULT 继承类上的组合逻辑；不合并时连同资源一起重置。
+        if (!ann.merge() || ann.logical() != Logical.DEFAULT) {
+            getResources().setLogical(ann.logical());
+        }
         setPhased(ann.phased());
         getResources().setPhased(ann.phased());
         for (Resource resource : ann.resources()) {
