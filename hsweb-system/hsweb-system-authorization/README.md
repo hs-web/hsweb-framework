@@ -41,6 +41,9 @@
 `DefaultReactiveAuthenticationManager#getByUserId` 仅缓存并委派 initializer，不额外查询用户。
 默认 initializer 的非禁用用户冷加载读取一次用户；缓存命中不读取用户。
 无缓存时使用同一 initializer。用户读取异常沿用原链路错误处理，无缓存时向调用方传播。
+默认 initializer 的维度读取、权限设置/定义读取及权限组装失败均终止初始化并传播异常，
+不返回已加载的部分身份，也不发布 `AuthorizationInitializeEvent`。真实没有维度或权限设置
+仍可完成初始化；缓存适配器按既有契约记录加载失败并返回空，不缓存部分身份，后续允许重新加载。
 状态变更需要在事务提交后发布 `ClearUserAuthorizationCacheEvent`，随后访问按最新状态重新加载。
 
 初始化接口、非禁用用户的权限构造和初始化事件语义保持不变。
