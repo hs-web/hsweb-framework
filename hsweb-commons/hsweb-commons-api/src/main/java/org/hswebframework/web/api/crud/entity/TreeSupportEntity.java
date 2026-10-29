@@ -130,13 +130,12 @@ public interface TreeSupportEntity<PK> extends Entity {
 
     static <T extends TreeSupportEntity> void forEach(Collection<T> list, Consumer<T> consumer) {
         Queue<T> queue = new LinkedList<>(list);
-        Set<Long> all = new HashSet<>();
+        // 身份哈希可能碰撞；只跳过同一个对象，不能遗漏不同节点。
+        Set<T> all = Collections.newSetFromMap(new IdentityHashMap<>());
         for (T node = queue.poll(); node != null; node = queue.poll()) {
-            long hash = System.identityHashCode(node);
-            if (all.contains(hash)) {
+            if (!all.add(node)) {
                 continue;
             }
-            all.add(hash);
             consumer.accept(node);
             if (!CollectionUtils.isEmpty(node.getChildren())) {
                 queue.addAll(node.getChildren());
