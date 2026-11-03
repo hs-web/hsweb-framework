@@ -1,5 +1,11 @@
 # 系统核心,通用工具等
 
+### 国际化
+
+`LocaleUtils.getSupportLocales()` 默认包含中文（`zh`）、英文（`en`）和日文（`ja`），可通过 JVM 参数 `-Dhsweb.locale.supports=...` 追加语言。该集合用于生成多语言数据，请求使用哪种语言仍由语言上下文决定。
+
+框架的 `core`、`commons`、`authentication`、`authentication-default`、`dictionary` 五组消息资源均在对应模块的 `src/main/resources/i18n/{模块}/messages_ja.properties` 提供日语翻译，覆盖已有中英文键名的并集，并保留消息参数占位符。资源编码沿用各模块惯例，由 `hsweb-starter` 的 `I18nConfiguration` 使用 UTF-8 加载；`ja-JP` 通过语言回退使用 `ja` 资源。
+
 
 ### bean 复制工具
 `FastBeanCopier`类. 提供高效的bean复制.支持复杂结构,类型转换,集合泛型,支持bean到map,map到bean的复制.
