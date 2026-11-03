@@ -45,6 +45,7 @@ public final class LocaleUtils {
         supportsLocales = new HashSet<>();
         supportsLocales.add(Locale.CHINESE);
         supportsLocales.add(Locale.ENGLISH);
+        supportsLocales.add(Locale.JAPANESE);
         String prop = System.getProperty("hsweb.locale.supports");
         if (prop != null) {
             try {
@@ -61,7 +62,7 @@ public final class LocaleUtils {
     }
 
     /**
-     * 获取支持的语言地区,默认支持中文和英文,可通过jvm参数: -Dhsweb.locale.supports=zh,en 来指定支持的语言地区
+     * 获取支持的语言地区,默认支持中文、英文和日文,可通过jvm参数: -Dhsweb.locale.supports=zh,en,ja 来追加支持的语言地区
      *
      * @return 支持的语言地区
      */
