@@ -33,6 +33,7 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
     private ConnectionFactory defaultFactory;
 
     @Setter
+    // 仅控制 SQL 占位符改写，参数绑定仍使用 SPI 的零基索引。
     private boolean bindCustomSymbol = false;
 
     @Setter
@@ -66,10 +67,6 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
         if (type == Date.class) {
             type = LocalDateTime.class;
         }
-        if (bindCustomSymbol) {
-            statement.bindNull(getBindSymbol() + (index + getBindFirstIndex()), type);
-            return;
-        }
         statement.bindNull(index, type);
     }
 
@@ -80,10 +77,6 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
                 .toInstant()
                 .atZone(ZoneOffset.systemDefault())
                 .toLocalDateTime();
-        }
-        if (bindCustomSymbol) {
-            statement.bind(getBindSymbol() + (index + getBindFirstIndex()), value);
-            return;
         }
         statement.bind(index, value);
     }
