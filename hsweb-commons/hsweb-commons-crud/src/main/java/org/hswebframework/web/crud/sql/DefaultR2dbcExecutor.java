@@ -26,6 +26,10 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
+/**
+ * 使用 Spring 管理连接和事务的响应式 SQL 执行器。
+ * 位置模式保留原生占位符；名称模式按配置改写并绑定普通参数，保留具名参数的重复引用。
+ */
 public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
 
     @Autowired
@@ -33,7 +37,7 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
     private ConnectionFactory defaultFactory;
 
     @Setter
-    // 仅控制 SQL 占位符改写，参数绑定仍使用 SPI 的零基索引。
+    // 同时控制普通参数的名称绑定；关闭时使用原有 SPI 位置绑定。
     private boolean bindCustomSymbol = false;
 
     @Setter
@@ -67,6 +71,10 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
         if (type == Date.class) {
             type = LocalDateTime.class;
         }
+        if (bindCustomSymbol) {
+            statement.bindNull(getBindSymbol() + (index + getBindFirstIndex()), type);
+            return;
+        }
         statement.bindNull(index, type);
     }
 
@@ -77,6 +85,10 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
                 .toInstant()
                 .atZone(ZoneOffset.systemDefault())
                 .toLocalDateTime();
+        }
+        if (bindCustomSymbol) {
+            statement.bind(getBindSymbol() + (index + getBindFirstIndex()), value);
+            return;
         }
         statement.bind(index, value);
     }
