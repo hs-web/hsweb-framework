@@ -68,27 +68,26 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
     }
 
     protected void bindNull(Statement statement, int index, Class type) {
+        if (bindCustomSymbol) {
+            super.bindNull(statement, index, type);
+            return;
+        }
         if (type == Date.class) {
             type = LocalDateTime.class;
-        }
-        if (bindCustomSymbol) {
-            statement.bindNull(getBindSymbol() + (index + getBindFirstIndex()), type);
-            return;
         }
         statement.bindNull(index, type);
     }
 
     protected void bind(Statement statement, int index, Object value) {
-
+        if (bindCustomSymbol) {
+            super.bind(statement, index, value);
+            return;
+        }
         if (value instanceof Date) {
             value = ((Date) value)
                 .toInstant()
                 .atZone(ZoneOffset.systemDefault())
                 .toLocalDateTime();
-        }
-        if (bindCustomSymbol) {
-            statement.bind(getBindSymbol() + (index + getBindFirstIndex()), value);
-            return;
         }
         statement.bind(index, value);
     }
