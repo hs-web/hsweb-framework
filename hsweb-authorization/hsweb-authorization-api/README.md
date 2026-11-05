@@ -18,6 +18,31 @@ _点击名称,查看源代码注释获得使用说明_
 
 [自定义数据权限控制](custom-data-access.md)
 
+### JSON 认证构建
+
+`SimpleAuthenticationBuilder` 默认使用 facade 的 `Json.global()`；可通过新增的构造参数传入
+`JsonMapper`，`SimpleAuthenticationBuilderFactory`、`SimpleDataAccessConfigBuilderFactory`
+也支持相同配置入口。
+
+```java
+JsonMapper mapper = Json.global(); // Spring 中也可直接注入应用的 JsonMapper
+var factory = new SimpleDataAccessConfigBuilderFactory(mapper);
+factory.init(); // 脱离 Spring 手动创建时，注册默认转换器
+var builder = new SimpleAuthenticationBuilder(factory, mapper);
+builder.permissionJson(mapper.wrap(List.of(Map.of("id", "device", "actions", List.of("query")))));
+Authentication authentication = builder.build();
+```
+
+已有权限 JSON 可以直接使用 `builder.permissionJson(mapper.readTree(permissionJson).asArray())`。
+设置列表使用 `readAsList`，JSON 对象与数据权限配置使用 `readAsMap`；认证属性按 `Serializable`
+值类型直接绑定。角色读取复用缓存的完整 `JsonType`，避免高频调用重复构造集合类型。
+
+旧 `permission(JSONArray)`、`dimension(JSONArray)` 保留并弃用，对应替代为
+`permissionJson(JsonArray)`、`dimensionJson(JsonArray)`。String 和完整认证 JSON 入口继续调用
+旧数组扩展点，已有子类覆写仍生效。构建器按次创建，mapper 可共享。
+数据权限对象直接交给 `fromMap`；自定义 `DataAccessConfigConverter` 仍接收 String，
+只有该边界需要将嵌套 `config` 编码，未设置 `config` 时编码完整权限配置。
+
 ### 常用类
 _点击名称,查看源代码注释获得使用说明_
 

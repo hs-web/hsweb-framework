@@ -14,6 +14,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.jetlinks</groupId>
+            <artifactId>json-facade-spring</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>

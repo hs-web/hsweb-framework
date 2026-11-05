@@ -41,16 +41,16 @@ import java.util.stream.Stream;
 /**
  * 枚举字典,使用枚举来实现数据字典,可通过集成此接口来实现一些有趣的功能.
  * ⚠️:如果使用了位运算来判断枚举,枚举数量不要超过64个,且顺序不要随意变动!
- * ⚠️:如果要开启在反序列化json的时候,支持将对象反序列化枚举,由于fastJson目前的版本还不支持从父类获取注解,
- * 所以需要在实现类上注解:<code>@JSONType(deserializer = EnumDict.EnumDictJSONDeserializer.class)</code>.
+ * 旧 fastjson 的对象反序列化需要在实现类声明 JSONType，相关解析器仅为兼容保留。
+ * 新代码使用配置好字典模块的 JsonMapper；Jackson 扩展入口为 {@link EnumDictDeserializer}。
  *
  * @author zhouhao
- * @see 3.0
+ * @since 3.0
  * @see EnumDictJSONDeserializer
  * @see JSONSerializable
  */
 @JSONType(deserializer = EnumDict.EnumDictJSONDeserializer.class)
-@JsonDeserialize(contentUsing = EnumDict.EnumDictJSONDeserializer.class)
+@JsonDeserialize(contentUsing = EnumDict.EnumDictDeserializer.class)
 public interface EnumDict<V> extends JSONSerializable, Serializable {
 
     /**
@@ -316,6 +316,8 @@ public interface EnumDict<V> extends JSONSerializable, Serializable {
         return this.getValue();
     }
 
+    /** @deprecated fastjson 专用写入入口；中立调用使用 JsonMapper.write。 */
+    @Deprecated
     @Override
     default void write(JSONSerializer jsonSerializer, Object o, Type type, int i) {
         if (isWriteJSONObjectEnabled()) {
@@ -325,14 +327,15 @@ public interface EnumDict<V> extends JSONSerializable, Serializable {
         }
     }
 
-    /**
-     * 自定义fastJson枚举序列化
-     */
-    @Slf4j
-    @AllArgsConstructor
-    @NoArgsConstructor
-    class EnumDictJSONDeserializer extends JsonDeserializer<Object> implements ObjectDeserializer {
-        private Function<Object, Object> mapper;
+    /** @deprecated fastjson 扩展保留兼容；Jackson 使用 {@link EnumDictDeserializer}。 */
+    @Deprecated
+    class EnumDictJSONDeserializer extends EnumDictDeserializer implements ObjectDeserializer {
+        public EnumDictJSONDeserializer() {
+        }
+
+        public EnumDictJSONDeserializer(Function<Object, Object> mapper) {
+            super(mapper);
+        }
 
         @Override
         @SuppressWarnings("all")
@@ -380,12 +383,21 @@ public interface EnumDict<V> extends JSONSerializable, Serializable {
         public int getFastMatchToken() {
             return JSONToken.LITERAL_STRING;
         }
+    }
+
+    /** Jackson 枚举字典绑定，与旧 fastjson 扩展隔离；匹配规则和字段校验保持一致。 */
+    @Slf4j
+    @AllArgsConstructor
+    @NoArgsConstructor
+    class EnumDictDeserializer extends JsonDeserializer<Object> {
+        private Function<Object, Object> mapper;
 
         @Override
         @SuppressWarnings("all")
         @SneakyThrows
         public Object deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            JsonNode node = jp.getCodec().readTree(jp);
+            // 读取当前值；文档尾部校验由外层读取负责，避免把数组下一项当成尾随内容。
+            JsonNode node = ctxt.readTree(jp);
             if (mapper != null) {
                 if (node.isTextual()) {
                     return mapper.apply(node.asText());

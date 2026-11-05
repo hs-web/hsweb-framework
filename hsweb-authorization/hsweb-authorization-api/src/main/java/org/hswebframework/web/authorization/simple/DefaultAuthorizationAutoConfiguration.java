@@ -5,13 +5,14 @@ import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.dimension.DimensionManager;
 import org.hswebframework.web.authorization.dimension.DimensionUserBindProvider;
-import org.hswebframework.web.authorization.simple.builder.DataAccessConfigConverter;
 import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.token.*;
 import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorManager;
 import org.hswebframework.web.authorization.twofactor.defaults.DefaultTwoFactorValidatorManager;
 import org.hswebframework.web.convert.CustomMessageConverter;
+import org.jetlinks.json.Json;
+import org.jetlinks.json.JsonMapper;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -28,6 +29,15 @@ import java.util.List;
  */
 @AutoConfiguration
 public class DefaultAuthorizationAutoConfiguration {
+
+    // 延迟取得所属上下文的门面；配置类创建期间不触发原生 mapper 或应用全局初始化。
+    @Autowired
+    private ObjectProvider<JsonMapper> jsonMappers;
+
+    private JsonMapper jsonMapper() {
+        // 旧工厂方法也允许脱离容器调用，此时使用 facade 默认入口。
+        return jsonMappers == null ? Json.global() : jsonMappers.getIfAvailable(Json::global);
+    }
 
     @Bean
     @ConditionalOnMissingBean(UserTokenManager.class)
@@ -65,13 +75,14 @@ public class DefaultAuthorizationAutoConfiguration {
     @ConditionalOnMissingBean(DataAccessConfigBuilderFactory.class)
     @ConfigurationProperties(prefix = "hsweb.authorization.data-access", ignoreInvalidFields = true)
     public SimpleDataAccessConfigBuilderFactory dataAccessConfigBuilderFactory() {
-        return new SimpleDataAccessConfigBuilderFactory();
+        return new SimpleDataAccessConfigBuilderFactory(jsonMapper());
     }
 
     @Bean
     @ConditionalOnMissingBean(AuthenticationBuilderFactory.class)
     public AuthenticationBuilderFactory authenticationBuilderFactory(DataAccessConfigBuilderFactory dataAccessConfigBuilderFactory) {
-        return new SimpleAuthenticationBuilderFactory(dataAccessConfigBuilderFactory);
+        return new SimpleAuthenticationBuilderFactory(dataAccessConfigBuilderFactory,
+            jsonMapper());
     }
 
     @Bean

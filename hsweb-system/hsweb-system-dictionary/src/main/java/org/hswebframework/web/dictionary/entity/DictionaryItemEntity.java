@@ -16,7 +16,6 @@
  */
 package org.hswebframework.web.dictionary.entity;
 
-import com.alibaba.fastjson.JSONObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,11 +31,11 @@ import org.hswebframework.web.i18n.MultipleI18nSupportEntity;
 import org.hswebframework.web.utils.DigestUtils;
 import org.springframework.util.StringUtils;
 
+import java.sql.JDBCType;
+import java.util.*;
 import javax.persistence.Column;
 import javax.persistence.Index;
 import javax.persistence.Table;
-import java.sql.JDBCType;
-import java.util.*;
 
 /**
  * 数据字典选项
@@ -152,7 +151,7 @@ public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String>
 
     @Override
     public Object getWriteJSONObject() {
-        JSONObject jsonObject = new JSONObject();
+        java.util.Map<String, Object> jsonObject = new java.util.HashMap<>();
         jsonObject.put("id", getId());
         jsonObject.put("name", getI18nName());
         jsonObject.put("dictId", getDictId());
