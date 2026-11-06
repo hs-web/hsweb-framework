@@ -23,11 +23,11 @@
 
 #### 访问器支持
 
-`FastBeanCopier` 支持标准 JavaBean 访问器、链式 setter（如 `getName()` / `Bean setName(String)`），以及同名的 fluent 方法对（如 `name()` / `Bean name(String)`，包括继承的方法）。扩展识别仅匹配公开实例方法，getter 返回类型必须与 setter 参数类型一致，避免重载选择依赖反射枚举顺序；已有标准 JavaBean 属性优先。属性仍需同时可读、可写，单独的 fluent 读取方法、静态 setter 及参数类型不匹配的方法对不会被识别为可复制属性。
+`FastBeanCopier` 支持标准 JavaBean 访问器、链式 setter（如 `getName()` / `Bean setName(String)`），以及同名的 fluent 方法对（如 `name()` / `Bean name(String)`，包括继承的方法）。扩展识别仅匹配公开实例方法，getter 返回类型必须与 setter 参数类型一致，避免重载选择依赖反射枚举顺序；已有标准 JavaBean 属性优先。源属性只需可读，只有标准 getter 的只读属性也可复制到 Map、可写 Bean 或 record；目标 Bean 属性仍需可写，不尝试修改只读属性。单独的 fluent 读取方法仍不作为属性识别，静态访问器及参数类型不匹配的方法对不参与复制。
 
 实现位于 `hsweb-core/src/main/java/org/hswebframework/web/bean/FastBeanCopier.java`，使用独立的 `PropertyUtilsBean` 和内省扩展点，不修改全局 BeanUtils 配置，复用现有代码生成、类型转换和缓存。
 
-验证：`FastBeanCopierBeanTest` 的新增回归测试覆盖 Bean/Map 双向复制、不同访问器风格的 Bean 间复制、继承泛型转换、忽略属性、标准访问器优先级、方法配对边界、全局配置隔离、setter 重载声明顺序及静态 setter 排除。执行 `mvn -o -pl hsweb-core -am '-Dtest=org.hswebframework.web.bean.*Test' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.test.redirectTestOutputToFile=true test`，编译成功，34 项测试全部通过。
+访问器回归由 `FastBeanCopierBeanTest`、`FastBeanCopierReadOnlyTest` 和 `FastBeanCopierTest` 覆盖，包括只读源属性、目标可写边界、不同访问器风格、继承泛型、忽略属性、record、全局配置隔离及静态访问器排除。
 
 约定: 如果属性类实现了`Cloneable`接口,在复制的时候将调用`clone`方法.所以如果你实现了`Cloneable`接口,就必须重写`clone`方法并且为`public`修饰的.
 
