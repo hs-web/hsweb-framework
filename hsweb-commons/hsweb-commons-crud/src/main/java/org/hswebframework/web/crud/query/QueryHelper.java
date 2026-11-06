@@ -791,11 +791,11 @@ public interface QueryHelper {
     static <T, R> Mono<PagerResult<R>> queryPager(QueryParamEntity queryParam,
                                                   Supplier<ReactiveQuery<T>> query,
                                                   Function<T, R> mapper) {
-        return Mono.deferContextual(contextView -> doQueryPager(
+        return QueryOperationContext.within(Mono.deferContextual(contextView -> doQueryPager(
             queryParam,
             query,
             mapper,
-            PagerQueryPolicy.from(contextView)));
+            PagerQueryPolicy.from(contextView))));
     }
 
     /**
@@ -831,7 +831,7 @@ public interface QueryHelper {
                                                   Supplier<ReactiveQuery<T>> query,
                                                   Function<T, R> mapper,
                                                   PagerQueryPolicy policy) {
-        return Mono.defer(() -> doQueryPager(queryParam, query, mapper, policy));
+        return QueryOperationContext.within(Mono.defer(() -> doQueryPager(queryParam, query, mapper, policy)));
     }
 
     private static <T, R> Mono<PagerResult<R>> doQueryPager(QueryParamEntity queryParam,
