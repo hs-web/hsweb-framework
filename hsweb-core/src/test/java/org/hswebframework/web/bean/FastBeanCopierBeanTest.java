@@ -140,8 +140,9 @@ public class FastBeanCopierBeanTest {
         StaticVoidSetter standard = FastBeanCopier.copy(values, new StaticVoidSetter());
         Assert.assertEquals("retained", chain.getName());
         Assert.assertEquals("retained", standard.getName());
-        Assert.assertTrue(FastBeanCopier.copy(chain, new LinkedHashMap<>()).isEmpty());
-        Assert.assertTrue(FastBeanCopier.copy(standard, new LinkedHashMap<>()).isEmpty());
+        // 静态 setter 不能写入，但公开实例 getter 仍可作为只读源属性。
+        Assert.assertEquals(Map.of("name", "retained"), FastBeanCopier.copy(chain, new LinkedHashMap<>()));
+        Assert.assertEquals(Map.of("name", "retained"), FastBeanCopier.copy(standard, new LinkedHashMap<>()));
 
         Assert.assertEquals("updated", FastBeanCopier.copy(values, new ChainWithStaticOverload()).getName());
     }

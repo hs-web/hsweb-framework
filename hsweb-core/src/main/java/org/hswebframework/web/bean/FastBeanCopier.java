@@ -301,7 +301,7 @@ public final class FastBeanCopier {
         }
     }
 
-    private static Map<String, ClassProperty> createProperty(Class<?> type) {
+    private static Map<String, ClassProperty> createProperty(Class<?> type, boolean forWrite) {
 
         if (type.isRecord()) {
             return createRecordProperty(type);
@@ -315,7 +315,10 @@ public final class FastBeanCopier {
         return Stream.of(propertyUtils.getPropertyDescriptors(type))
                      .filter(property -> !property
                          .getName()
-                         .equals("class") && property.getReadMethod() != null && property.getWriteMethod() != null)
+                         .equals("class") && property.getReadMethod() != null
+                         && !Modifier.isStatic(property.getReadMethod().getModifiers())
+                         // 源对象只读取属性；不能因其没有 setter 而丢失只读数据。
+                         && (!forWrite || property.getWriteMethod() != null))
                      .map(BeanClassProperty::new)
                      //让字段有序
                      .sorted(Comparator.comparing(property -> fieldNames.indexOf(property.name)))
@@ -343,7 +346,7 @@ public final class FastBeanCopier {
     private static String createRecordCopierCode(Class<?> source, Class<?> target) {
         Map<String, ClassProperty> sourceProperties = Map.class.isAssignableFrom(source)
             ? createMapProperty(createRecordProperty(target))
-            : createProperty(source);
+            : createProperty(source, false);
         String sourceTypeName = getTypeName(source);
         String targetTypeName = getTypeName(target);
         boolean sourceIsMap = Map.class.isAssignableFrom(source);
@@ -415,16 +418,16 @@ public final class FastBeanCopier {
         //源类型为Map
         if (sourceIsMap) {
             if (!targetIsMap) {
-                targetProperties = createProperty(target);
+                targetProperties = createProperty(target, true);
                 sourceProperties = createMapProperty(targetProperties);
 
             }
         } else if (targetIsMap) {
-            sourceProperties = createProperty(source);
+            sourceProperties = createProperty(source, false);
             targetProperties = createMapProperty(sourceProperties);
         } else {
-            targetProperties = createProperty(target);
-            sourceProperties = createProperty(source);
+            targetProperties = createProperty(target, true);
+            sourceProperties = createProperty(source, false);
         }
         if (sourceProperties == null || targetProperties == null) {
             throw new UnsupportedOperationException("不支持的类型,source:" + source + " target:" + target);
@@ -670,10 +673,15 @@ public final class FastBeanCopier {
         public BeanClassProperty(PropertyDescriptor descriptor) {
             type = descriptor.getPropertyType();
             readMethodName = descriptor.getReadMethod().getName();
-            writeMethodName = descriptor.getWriteMethod().getName();
+            writeMethodName = descriptor.getWriteMethod() == null ? null : descriptor.getWriteMethod().getName();
 
             getter = createGetterFunction();
-            setter = createSetterFunction(paramGetter -> writeMethodName + "(" + paramGetter + ")");
+            setter = createSetterFunction(paramGetter -> {
+                if (writeMethodName == null) {
+                    throw new UnsupportedOperationException("Property is read-only: " + descriptor.getName());
+                }
+                return writeMethodName + "(" + paramGetter + ")";
+            });
             name = descriptor.getName();
             beanType = descriptor.getReadMethod().getDeclaringClass();
 
