@@ -1,14 +1,15 @@
 package org.hswebframework.web.bean;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jetlinks.json.Json;
 
 import java.util.*;
 
+/** Bean 属性差异；JSON 输出使用 facade 应用默认配置，before/after 保留原值。 */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -46,6 +47,6 @@ public class Diff {
 
     @Override
     public String toString() {
-        return JSON.toJSONString(this);
+        return Json.global().write(this);
     }
 }

@@ -17,6 +17,17 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.jetlinks</groupId>
+            <artifactId>json-facade-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jetlinks</groupId>
+            <artifactId>json-facade-jackson2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
             <version>4.9.3</version>

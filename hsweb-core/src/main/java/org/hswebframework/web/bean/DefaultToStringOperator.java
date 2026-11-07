@@ -1,8 +1,8 @@
 package org.hswebframework.web.bean;
 
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.utils.time.DateFormatter;
+import org.jetlinks.json.Json;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
@@ -211,7 +211,7 @@ public class DefaultToStringOperator<T> implements ToStringOperator<T> {
                             value = convertMap(((Map) value), feature, newIgnoreProperty);
                         }
                         if (propertyJsonFormat) {
-                            return JSON.toJSONString(value);
+                            return Json.global().write(value);
                         }
                         return value;
                     }
@@ -330,7 +330,7 @@ public class DefaultToStringOperator<T> implements ToStringOperator<T> {
 
         Map<String, Object> mapValue = toMap(target, features, ignoreProperty);
         if (ToString.Feature.hasFeature(features, ToString.Feature.jsonFormat)) {
-            return JSON.toJSONString(mapValue);
+            return Json.global().write(mapValue);
         }
         boolean writeClassName = ToString.Feature.hasFeature(features, ToString.Feature.writeClassname);
 

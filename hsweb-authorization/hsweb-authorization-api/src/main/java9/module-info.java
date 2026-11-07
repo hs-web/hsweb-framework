@@ -9,6 +9,7 @@ module hsweb.authorization.api {
     requires reactor.core;
     requires static lombok;
     requires fastjson;
+    requires json.facade.api;
     requires commons.collections;
     requires com.fasterxml.jackson.annotation;
     requires jakarta.annotation;

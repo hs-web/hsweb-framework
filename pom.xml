@@ -86,6 +86,7 @@
         <javassist.version>3.30.2-GA</javassist.version>
 
         <fastjson.version>1.2.83_noneautotype</fastjson.version>
+        <json-facade.version>1.0.0-SNAPSHOT</json-facade.version>
         <h2.version>2.3.232</h2.version>
         <mysql.version>5.1.39</mysql.version>
         <cglib.version>3.2.2</cglib.version>
@@ -480,6 +481,22 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jetlinks</groupId>
+                <artifactId>json-facade-api</artifactId>
+                <version>${json-facade.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetlinks</groupId>
+                <artifactId>json-facade-jackson2</artifactId>
+                <version>${json-facade.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetlinks</groupId>
+                <artifactId>json-facade-spring</artifactId>
+                <version>${json-facade.version}</version>
             </dependency>
 
             <dependency>
