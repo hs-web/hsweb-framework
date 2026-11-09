@@ -76,6 +76,11 @@ public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String>
     @Schema(description = "状态，0禁用，1启用")
     @DefaultValue("1")
     private Byte status;
+
+    @Override
+    public boolean isEnabled() {
+        return Byte.valueOf((byte) 1).equals(status);
+    }
     //说明
     @Column
     @Schema(description = "说明")
