@@ -128,6 +128,10 @@ public Mono<String> addAccount(@RequestBody Mono<Account> account){
 
 ```
 
+## 实体部分更新事件
+
+`hsweb-commons-crud` 的 prepare / before / after 修改事件通过 `submittedValues` 提供只读的原始提交快照，保留显式 null 和虚拟属性；`before` / `after` 仍表示映射列视图。`Extendable.extensions()` 返回 null 时按空扩展处理，普通提交字段仍保留在快照中。该语义同样适用于未启用动态字段的实体更新，不改变原有事件启用规则或事务边界。
+
 ## 本地响应式缓存失效
 
 `hsweb-concurrent/hsweb-concurrent-cache` 中的 Guava、Caffeine 缓存在

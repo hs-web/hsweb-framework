@@ -262,12 +262,13 @@ public class EntityEventListener implements EventListener, Ordered {
     /**
      * Original partial-update input survives physical-column omission. The entity bridge owns
      * Extendable semantics; EasyORM only carries the generic changed-values snapshot.
+     * A null extension map retains the existing empty-extension semantics.
      */
     protected Map<String, Object> submittedValues(EventContext context) {
         return context.get(submittedValuesContextKey).orElseGet(() -> {
             Map<String, Object> values = new LinkedHashMap<>();
             context.get(MappingContextKeys.instance).filter(Extendable.class::isInstance)
-                .map(Extendable.class::cast).ifPresent(entity -> values.putAll(entity.extensions()));
+                .map(Extendable.class::cast).map(Extendable::extensions).ifPresent(values::putAll);
             values.putAll(context.get(MappingContextKeys.submittedValues)
                 .orElseGet(() -> context.get(MappingContextKeys.updateColumnInstance).orElse(Collections.emptyMap())));
             Map<String, Object> snapshot = new LinkedHashMap<>();
