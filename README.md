@@ -138,6 +138,8 @@ public Mono<String> addAccount(@RequestBody Mono<Account> account){
 
 ## 本地响应式缓存失效
 
+`EnableCacheReactiveCrudService.findById` 和 `GenericReactiveCacheSupportCrudService.getCacheAll` 在订阅时检查仓库的 `isResultCacheable()`。权限或上下文装配仓库返回 false 时绕过共享实体缓存，避免不同订阅者复用完整结果；普通仓库保留原有缓存命中与失效行为。仓库装饰器负责声明其自身的上下文依赖。
+
 `hsweb-concurrent/hsweb-concurrent-cache` 中的 Guava、Caffeine 缓存在
 `evict`、`evictAll` 处理对应 key 时撤销已登记的加载者，`clear` 撤销处理时已有的加载者。
 加载成功时通过现有加载映射在同一 key 的原子操作内校验身份并同步回填。
