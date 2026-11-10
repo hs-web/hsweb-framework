@@ -32,4 +32,5 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
     - name: Build changed modules with Maven
-      run: ./mvnw test -q -pl "$(./changes.sh)"
+      # The Maven cache may contain a snapshot published before an upstream API change.
+      run: ./mvnw -U test -q -pl "$(./changes.sh)"
