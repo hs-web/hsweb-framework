@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
 public class QueryOperationContextTest {
@@ -107,12 +108,27 @@ public class QueryOperationContextTest {
     }
 
     @Test
-    public void testWithinJoinsExplicitlyEnclosingScope() {
-        QueryOperationContext enclosing = new QueryOperationContext();
+    public void testNestedOperationIsolatesChangedContextAndRestoresEnclosingScope() {
         Mono<Integer> operation = QueryOperationContext.within(Mono.deferContextual(context -> {
-            assertSame(enclosing, QueryOperationContext.current(context).orElseThrow());
-            return Mono.just(1);
-        })).contextWrite(Context.of(QueryOperationContext.class, enclosing));
+            QueryOperationContext enclosing = QueryOperationContext.current(context).orElseThrow();
+            return enclosing.memoize(KEY, () -> Mono.just(1)).flatMap(outer ->
+                QueryOperationContext.within(Mono.deferContextual(innerContext -> {
+                    assertEquals("permission", innerContext.get("caller"));
+                    QueryOperationContext inner = QueryOperationContext.current(innerContext).orElseThrow();
+                    assertNotSame(enclosing, inner);
+                    return inner.memoize(KEY, () -> Mono.just(innerContext.<Integer>get("scopeValue")));
+                }))
+                    .contextWrite(innerContext -> innerContext.put("scopeValue", 2))
+                    .flatMap(inner -> {
+                        assertEquals(Integer.valueOf(2), inner);
+                        return Mono.deferContextual(restored -> {
+                            assertSame(enclosing, QueryOperationContext.current(restored).orElseThrow());
+                            assertEquals(Integer.valueOf(1), restored.get("scopeValue"));
+                            return enclosing.memoize(KEY, () -> Mono.error(
+                                new AssertionError("nested work must preserve the enclosing result")));
+                        });
+                    }));
+        })).contextWrite(Context.of("caller", "permission", "scopeValue", 1));
 
         StepVerifier.create(operation).expectNext(1).verifyComplete();
     }

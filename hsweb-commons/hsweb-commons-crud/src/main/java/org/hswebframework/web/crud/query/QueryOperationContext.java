@@ -78,11 +78,13 @@ public final class QueryOperationContext {
     }
 
     /**
-     * Run an operation in a new scope per subscription, or join an explicitly enclosing scope.
+     * Run an independent operation in a new scope per subscription, including nested operations.
      *
-     * <p>All child subscriptions, including parallel count and data queries, receive the same
-     * scope through Reactor context. Re-subscribing without an enclosing scope creates fresh
-     * state. No source is subscribed or scheduled by this method.</p>
+     * <p>Child subscriptions, including parallel count and data queries, inherit this scope until
+     * another operation owner calls this method. A nested operation replaces only this context
+     * entry; the caller's other Reactor context values remain available, and the enclosing scope
+     * remains unchanged. A boundary switching business or authorization context must wrap its
+     * work with this method after that switch. No source is subscribed or scheduled here.</p>
      *
      * @param operation cold operation to execute
      * @param <T> operation result type
@@ -90,8 +92,7 @@ public final class QueryOperationContext {
      * @since 5.0.3
      */
     public static <T> Mono<T> within(Mono<T> operation) {
-        return Mono.defer(() -> operation.contextWrite(context -> context.hasKey(QueryOperationContext.class)
-            ? context
-            : context.put(QueryOperationContext.class, new QueryOperationContext())));
+        return Mono.defer(() -> operation.contextWrite(context ->
+            context.put(QueryOperationContext.class, new QueryOperationContext())));
     }
 }

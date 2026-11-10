@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -30,6 +31,49 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class QueryHelperPagerTest {
+
+    @Test
+    public void testNestedPagerIsolatesPreparationWhileEachPagerSharesCountAndRows() {
+        for (boolean parallel : new boolean[]{false, true}) {
+            QueryParamEntity outerParam = QueryParamEntity.of();
+            outerParam.setParallelPager(parallel);
+            QueryParamEntity innerParam = QueryParamEntity.of();
+            innerParam.setParallelPager(parallel);
+            AtomicInteger outerLoaded = new AtomicInteger();
+            AtomicInteger innerLoaded = new AtomicInteger();
+            List<QueryOperationContext> outerScopes = new ArrayList<>();
+            List<QueryOperationContext> innerScopes = new ArrayList<>();
+            ReactiveQuery<Integer> outer = mockPreparedQuery(
+                () -> Mono.deferContextual(context -> Mono.just(context.<Integer>get("scopeValue")))
+                    .doOnSubscribe(ignore -> outerLoaded.incrementAndGet()), outerScopes);
+            ReactiveQuery<Integer> inner = mockPreparedQuery(
+                () -> Mono.deferContextual(context -> Mono.just(context.<Integer>get("scopeValue")))
+                    .doOnSubscribe(ignore -> innerLoaded.incrementAndGet()), innerScopes);
+            Flux<Integer> outerRows = outer.fetch();
+            when(outer.fetch()).thenReturn(outerRows.concatMap(value ->
+                QueryHelper.queryPager(innerParam, () -> inner, PagerQueryPolicy.clamp(10))
+                    .contextWrite(context -> context.put("scopeValue", 2))
+                    .doOnNext(result -> {
+                        assertEquals(2, result.getTotal());
+                        assertEquals(List.of(2), result.getData());
+                    }).thenReturn(value)));
+
+            StepVerifier.create(QueryHelper.queryPager(outerParam, () -> outer)
+                .contextWrite(context -> context.put("scopeValue", 1)))
+                .assertNext(result -> {
+                    assertEquals(1, result.getTotal());
+                    assertEquals(List.of(1), result.getData());
+                }).verifyComplete();
+
+            assertEquals(1, outerLoaded.get());
+            assertEquals(1, innerLoaded.get());
+            assertEquals(2, outerScopes.size());
+            assertEquals(2, innerScopes.size());
+            assertSame(outerScopes.get(0), outerScopes.get(1));
+            assertSame(innerScopes.get(0), innerScopes.get(1));
+            assertNotSame(outerScopes.get(0), innerScopes.get(0));
+        }
+    }
 
     @Test
     public void testParallelPagerSharesOneInFlightPreparation() {

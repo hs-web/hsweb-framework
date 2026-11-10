@@ -132,6 +132,10 @@ public Mono<String> addAccount(@RequestBody Mono<Account> account){
 
 `hsweb-commons-crud` 的 prepare / before / after 修改事件通过 `submittedValues` 提供只读的原始提交快照，保留显式 null 和虚拟属性；`before` / `after` 仍表示映射列视图。`Extendable.extensions()` 返回 null 时按空扩展处理，普通提交字段仍保留在快照中。该语义同样适用于未启用动态字段的实体更新，不改变原有事件启用规则或事务边界。
 
+## 查询操作上下文
+
+`QueryOperationContext.within(operation)` 为每次订阅创建独立的准备结果作用域。`QueryHelper.queryPager()` 在入口建立作用域，内部 count / rows 共享结果；嵌套的独立分页建立自己的作用域，完成后外层仍使用原有作用域。普通子查询继承所属操作的上下文；切换业务范围或授权上下文时，由拥有该切换的操作边界在新 Reactor Context 中使用 `within()` 包裹查询。缓存 key 不耦合租户或用户字段，缓存内容限于本次操作的不可变准备结果，不提供数据库事务快照。
+
 ## 本地响应式缓存失效
 
 `hsweb-concurrent/hsweb-concurrent-cache` 中的 Guava、Caffeine 缓存在
