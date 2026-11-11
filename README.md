@@ -128,7 +128,17 @@ public Mono<String> addAccount(@RequestBody Mono<Account> account){
 
 ```
 
+## 实体部分更新事件
+
+`hsweb-commons-crud` 的 prepare / before / after 修改事件通过 `submittedValues` 提供只读的原始提交快照，保留显式 null 和虚拟属性；`before` / `after` 仍表示映射列视图。`Extendable.extensions()` 返回 null 时按空扩展处理，普通提交字段仍保留在快照中。该语义同样适用于未启用动态字段的实体更新，不改变原有事件启用规则或事务边界。
+
+## 查询操作上下文
+
+`QueryOperationContext.within(operation)` 为每次订阅创建独立的准备结果作用域。`QueryHelper.queryPager()` 在入口建立作用域，内部 count / rows 共享结果；嵌套的独立分页建立自己的作用域，完成后外层仍使用原有作用域。普通子查询继承所属操作的上下文；切换业务范围或授权上下文时，由拥有该切换的操作边界在新 Reactor Context 中使用 `within()` 包裹查询。缓存 key 不耦合租户或用户字段，缓存内容限于本次操作的不可变准备结果，不提供数据库事务快照。
+
 ## 本地响应式缓存失效
+
+`EnableCacheReactiveCrudService.findById` 和 `GenericReactiveCacheSupportCrudService.getCacheAll` 在订阅时检查仓库的 `isResultCacheable()`。权限或上下文装配仓库返回 false 时绕过共享实体缓存，避免不同订阅者复用完整结果；普通仓库保留原有缓存命中与失效行为。结果转换器默认不可共享缓存，不依赖上下文且依赖数据更新由既有失效机制覆盖的转换器可显式声明 true，缓存服务无需识别转换器或业务类型。仓库装饰器负责声明其自身的上下文依赖，目标仓库可缓存不代表权限装饰器可以共享结果。`GenericReactiveCacheSupportCrudServiceTest` 用真实 H2 查询验证纯转换的 ID/全量缓存命中、写后失效，以及上下文转换绕过旧缓存。
 
 `hsweb-concurrent/hsweb-concurrent-cache` 中的 Guava、Caffeine 缓存在
 `evict`、`evictAll` 处理对应 key 时撤销已登记的加载者，`clear` 撤销处理时已有的加载者。

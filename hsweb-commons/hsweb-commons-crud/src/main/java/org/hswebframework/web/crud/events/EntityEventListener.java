@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.hswebframework.ezorm.core.GlobalConfig;
+import org.hswebframework.ezorm.core.Extendable;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.events.EventListener;
 import org.hswebframework.ezorm.rdb.events.*;
@@ -43,6 +44,7 @@ public class EntityEventListener implements EventListener, Ordered {
     public static final ContextKey<List<Object>> readyToUpdateBeforeContextKey = ContextKey.of("readyToUpdateBefore");
     //更新后的数据
     public static final ContextKey<List<Object>> readyToUpdateAfterContextKey = ContextKey.of("readyToUpdateAfter");
+    private static final ContextKey<Map<String, Object>> submittedValuesContextKey = ContextKey.of("entitySubmittedValues");
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -257,6 +259,40 @@ public class EntityEventListener implements EventListener, Ordered {
                 eventPublisher::publishEvent);
     }
 
+    /**
+     * Original partial-update input survives physical-column omission. The entity bridge owns
+     * Extendable semantics; EasyORM only carries the generic changed-values snapshot.
+     * A null extension map retains the existing empty-extension semantics.
+     */
+    protected Map<String, Object> submittedValues(EventContext context) {
+        return context.get(submittedValuesContextKey).orElseGet(() -> {
+            Map<String, Object> values = new LinkedHashMap<>();
+            context.get(MappingContextKeys.instance).filter(Extendable.class::isInstance)
+                .map(Extendable.class::cast).map(Extendable::extensions).ifPresent(values::putAll);
+            values.putAll(context.get(MappingContextKeys.submittedValues)
+                .orElseGet(() -> context.get(MappingContextKeys.updateColumnInstance).orElse(Collections.emptyMap())));
+            Map<String, Object> snapshot = new LinkedHashMap<>();
+            values.forEach((key, value) -> snapshot.put(key, snapshotSubmittedValue(value)));
+            Map<String, Object> immutable = Collections.unmodifiableMap(snapshot);
+            context.set(submittedValuesContextKey, immutable);
+            return immutable;
+        });
+    }
+
+    private static Object snapshotSubmittedValue(Object value) {
+        if (value instanceof Map<?, ?> map) {
+            Map<Object, Object> result = new LinkedHashMap<>();
+            map.forEach((key, item) -> result.put(key, snapshotSubmittedValue(item)));
+            return Collections.unmodifiableMap(result);
+        }
+        if (value instanceof Collection<?> collection) {
+            List<Object> result = new ArrayList<>(collection.size());
+            collection.forEach(item -> result.add(snapshotSubmittedValue(item)));
+            return Collections.unmodifiableList(result);
+        }
+        return value;
+    }
+
     protected Mono<Void> sendDeleteEvent(List<Object> olds,
                                          Class<Object> type,
                                          BiFunction<List<Object>, Class<Object>, AsyncEvent> eventBuilder) {
@@ -347,7 +383,8 @@ public class EntityEventListener implements EventListener, Ordered {
                     .orElseThrow(UnsupportedOperationException::new);
             Class entityType = (Class) mapping.getEntityType();
             if (isEnabled(entityType, EntityEventType.modify, EntityEventPhase.after)) {
-                block(sendUpdateEvent(before, after, entityType, EntityModifyEvent::new));
+                block(sendUpdateEvent(before, after, entityType,
+                    (old, fresh, entityType0) -> new EntityModifyEvent(old, fresh, entityType0, submittedValues(context))));
             }
         }
     }
@@ -402,7 +439,7 @@ public class EntityEventListener implements EventListener, Ordered {
                                         updated.set(Tuples.of(list, after));
                                         context.set(readyToUpdateBeforeContextKey, list);
                                         context.set(readyToUpdateAfterContextKey, after);
-                                        EntityPrepareModifyEvent event = new EntityPrepareModifyEvent(list, after, entityType);
+                                        EntityPrepareModifyEvent event = new EntityPrepareModifyEvent(list, after, entityType, submittedValues(context));
 
                                         return sendUpdateEvent(list,
                                                 after,
@@ -425,7 +462,7 @@ public class EntityEventListener implements EventListener, Ordered {
                             return sendUpdateEvent(_tmp.getT1(),
                                     _tmp.getT2(),
                                     entityType,
-                                    EntityBeforeModifyEvent::new);
+                                    (old, fresh, entityType0) -> new EntityBeforeModifyEvent(old, fresh, entityType0, submittedValues(context)));
                         }
                         return Mono.empty();
                     }));
@@ -440,7 +477,7 @@ public class EntityEventListener implements EventListener, Ordered {
                                     return sendUpdateEvent(_tmp.getT1(),
                                             _tmp.getT2(),
                                             entityType,
-                                            EntityModifyEvent::new);
+                                            (old, fresh, entityType0) -> new EntityModifyEvent(old, fresh, entityType0, submittedValues(context)));
                                 }
                                 return Mono.empty();
                             }));
@@ -460,7 +497,7 @@ public class EntityEventListener implements EventListener, Ordered {
 
                 // prepare
                 if (isEnabled(entityType, EntityEventType.modify, EntityEventPhase.prepare)) {
-                    EntityPrepareModifyEvent event = new EntityPrepareModifyEvent(before, after, entityType);
+                    EntityPrepareModifyEvent event = new EntityPrepareModifyEvent(before, after, entityType, submittedValues(context));
                     block(
                             sendUpdateEvent(before,
                                     after,
@@ -475,7 +512,7 @@ public class EntityEventListener implements EventListener, Ordered {
                     block(sendUpdateEvent(before,
                             after,
                             entityType,
-                            EntityBeforeModifyEvent::new));
+                            (old, fresh, entityType0) -> new EntityBeforeModifyEvent(old, fresh, entityType0, submittedValues(context))));
                 }
 
             }

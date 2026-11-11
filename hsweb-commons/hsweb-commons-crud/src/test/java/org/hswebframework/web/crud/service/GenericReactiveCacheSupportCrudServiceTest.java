@@ -1,6 +1,8 @@
 package org.hswebframework.web.crud.service;
 
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
+import org.hswebframework.ezorm.rdb.mapping.ReactiveQueryResultContext;
+import org.hswebframework.ezorm.rdb.mapping.ReactiveQueryResultTransformer;
 import org.hswebframework.web.crud.CountingReactiveSqlExecutor;
 import org.hswebframework.web.crud.TestApplication;
 import org.hswebframework.web.crud.entity.TestEntity;
@@ -16,6 +18,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
@@ -39,12 +42,91 @@ public class GenericReactiveCacheSupportCrudServiceTest {
 
     @Before
     public void countRealSql() {
-        sql = new CountingReactiveSqlExecutor(database.getMetadata().getTable("s_test").orElseThrow());
+        sql = new CountingReactiveSqlExecutor(database.getMetadata());
     }
 
     @After
     public void restoreSqlExecutor() {
         sql.close();
+    }
+
+    @Test
+    public void contextDependentResultsBypassIdentityAndAllEntityCaches() {
+        TestEntity entity = TestEntity.of("cache-context", 10, "cache marker");
+        entityService.insert(entity).block();
+        entityService.findById(entity.getId()).block();
+        entityService.getCacheAll().collectList().block();
+        var table = database.getMetadata().getTable("s_test").orElseThrow();
+        table.addFeature(new ReactiveQueryResultTransformer() {
+            @Override
+            public <T> Flux<T> transform(Flux<T> rows, ReactiveQueryResultContext context) {
+                return Flux.deferContextual(subscriber -> rows.doOnNext(row ->
+                    ((TestEntity) row).setName(subscriber.getOrDefault("view", "default"))));
+            }
+        });
+        try {
+            assertFalse(entityService.getRepository().isResultCacheable());
+            for (String view : List.of("scope-A", "scope-B", "permission-denied")) {
+                assertEquals(view, entityService.findById(entity.getId()).contextWrite(c -> c.put("view", view)).block().getName());
+                assertEquals(view, entityService.getCacheAll().filter(row -> entity.getId().equals(row.getId()))
+                    .single().contextWrite(c -> c.put("view", view)).block().getName());
+            }
+        } finally {
+            table.getFeatures().remove(ReactiveQueryResultTransformer.ID_VALUE);
+            entityService.getCache().clear().block();
+        }
+        assertTrue(entityService.getRepository().isResultCacheable());
+        entityService.findById(entity.getId()).block();
+        sql.reset();
+        entityService.findById(entity.getId()).block();
+        assertEquals(0, sql.count("select"));
+    }
+
+    @Test
+    public void cacheSafeTransformationRetainsCacheHitsAndWriteInvalidation() {
+        TestEntity entity = TestEntity.of("source", 10, "cache-pure");
+        entityService.insert(entity).block();
+        var table = database.getMetadata().getTable("s_test").orElseThrow();
+        table.addFeature(new ReactiveQueryResultTransformer() {
+            @Override
+            public boolean isResultCacheable() {
+                return true;
+            }
+
+            @Override
+            public <T> Flux<T> transform(Flux<T> rows, ReactiveQueryResultContext context) {
+                return rows.doOnNext(row -> {
+                    TestEntity value = (TestEntity) row;
+                    value.setName("cached:" + value.getName());
+                });
+            }
+        });
+        try {
+            assertTrue(entityService.getRepository().isResultCacheable());
+            assertEquals("cached:source", entityService.findById(entity.getId()).block().getName());
+            assertEquals("cached:source", entityService.getCacheAll().filter(row -> entity.getId().equals(row.getId()))
+                .single().block().getName());
+            assertEquals("cached:source", entityService.getCache().getMono("id:" + entity.getId()).block().getName());
+            sql.reset();
+            for (String view : List.of("scope-A", "scope-B")) {
+                assertEquals("cached:source", entityService.findById(entity.getId())
+                    .contextWrite(context -> context.put("view", view)).block().getName());
+                assertEquals("cached:source", entityService.getCacheAll().filter(row -> entity.getId().equals(row.getId()))
+                    .single().contextWrite(context -> context.put("view", view)).block().getName());
+            }
+            assertEquals(0, sql.count("select"));
+
+            // 原写入失效必须同时移除 ID 和全量结果，重新读取时只转换一次。
+            entityService.updateById(entity.getId(), TestEntity.of("updated", 20, "cache-pure")).block();
+            sql.reset();
+            assertEquals("cached:updated", entityService.findById(entity.getId()).block().getName());
+            assertEquals("cached:updated", entityService.getCacheAll().filter(row -> entity.getId().equals(row.getId()))
+                .single().block().getName());
+            assertEquals(2, sql.count("select"));
+        } finally {
+            table.getFeatures().remove(ReactiveQueryResultTransformer.ID_VALUE);
+            entityService.getCache().clear().block();
+        }
     }
 
     @Test

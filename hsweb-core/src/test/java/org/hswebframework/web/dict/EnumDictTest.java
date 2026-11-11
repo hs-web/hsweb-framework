@@ -19,6 +19,11 @@ import static org.junit.Assert.*;
 public class EnumDictTest {
 
     @Test
+    public void staticOptionsRemainSelectableByDefault() {
+        assertTrue(TestEnum.E1.isEnabled());
+    }
+
+    @Test
     @SneakyThrows
     public void testJackson() {
         ObjectMapper mapper = new ObjectMapper();

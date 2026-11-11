@@ -40,6 +40,8 @@ public abstract class GenericReactiveCacheSupportCrudService<E, K> implements En
 
 
     public Flux<E> getCacheAll() {
-        return getCache().getFlux(ALL_DATA_KEY, () -> EnableCacheReactiveCrudService.super.createQuery().fetch());
+        return Flux.defer(() -> getRepository().isResultCacheable()
+            ? getCache().getFlux(ALL_DATA_KEY, () -> EnableCacheReactiveCrudService.super.createQuery().fetch())
+            : EnableCacheReactiveCrudService.super.createQuery().fetch());
     }
 }

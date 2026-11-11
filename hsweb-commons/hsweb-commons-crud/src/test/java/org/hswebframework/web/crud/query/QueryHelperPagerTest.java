@@ -8,15 +8,19 @@ import org.hswebframework.web.exception.ValidationException;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 import reactor.test.StepVerifier;
 import reactor.util.context.Context;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -27,6 +31,104 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class QueryHelperPagerTest {
+
+    @Test
+    public void testNestedPagerIsolatesPreparationWhileEachPagerSharesCountAndRows() {
+        for (boolean parallel : new boolean[]{false, true}) {
+            QueryParamEntity outerParam = QueryParamEntity.of();
+            outerParam.setParallelPager(parallel);
+            QueryParamEntity innerParam = QueryParamEntity.of();
+            innerParam.setParallelPager(parallel);
+            AtomicInteger outerLoaded = new AtomicInteger();
+            AtomicInteger innerLoaded = new AtomicInteger();
+            List<QueryOperationContext> outerScopes = new ArrayList<>();
+            List<QueryOperationContext> innerScopes = new ArrayList<>();
+            ReactiveQuery<Integer> outer = mockPreparedQuery(
+                () -> Mono.deferContextual(context -> Mono.just(context.<Integer>get("scopeValue")))
+                    .doOnSubscribe(ignore -> outerLoaded.incrementAndGet()), outerScopes);
+            ReactiveQuery<Integer> inner = mockPreparedQuery(
+                () -> Mono.deferContextual(context -> Mono.just(context.<Integer>get("scopeValue")))
+                    .doOnSubscribe(ignore -> innerLoaded.incrementAndGet()), innerScopes);
+            Flux<Integer> outerRows = outer.fetch();
+            when(outer.fetch()).thenReturn(outerRows.concatMap(value ->
+                QueryHelper.queryPager(innerParam, () -> inner, PagerQueryPolicy.clamp(10))
+                    .contextWrite(context -> context.put("scopeValue", 2))
+                    .doOnNext(result -> {
+                        assertEquals(2, result.getTotal());
+                        assertEquals(List.of(2), result.getData());
+                    }).thenReturn(value)));
+
+            StepVerifier.create(QueryHelper.queryPager(outerParam, () -> outer)
+                .contextWrite(context -> context.put("scopeValue", 1)))
+                .assertNext(result -> {
+                    assertEquals(1, result.getTotal());
+                    assertEquals(List.of(1), result.getData());
+                }).verifyComplete();
+
+            assertEquals(1, outerLoaded.get());
+            assertEquals(1, innerLoaded.get());
+            assertEquals(2, outerScopes.size());
+            assertEquals(2, innerScopes.size());
+            assertSame(outerScopes.get(0), outerScopes.get(1));
+            assertSame(innerScopes.get(0), innerScopes.get(1));
+            assertNotSame(outerScopes.get(0), innerScopes.get(0));
+        }
+    }
+
+    @Test
+    public void testParallelPagerSharesOneInFlightPreparation() {
+        QueryParamEntity source = QueryParamEntity.of();
+        source.setParallelPager(true);
+        AtomicInteger loaded = new AtomicInteger();
+        Sinks.One<Integer> preparation = Sinks.one();
+        List<QueryOperationContext> scopes = new ArrayList<>();
+        ReactiveQuery<Integer> query = mockPreparedQuery(
+            () -> preparation.asMono().doOnSubscribe(ignore -> loaded.incrementAndGet()),
+            scopes);
+
+        StepVerifier.create(QueryHelper.queryPager(source, () -> query, PagerQueryPolicy.clamp(10)))
+            .then(() -> {
+                assertEquals(1, loaded.get());
+                assertEquals(2, scopes.size());
+                preparation.tryEmitValue(1).orThrow();
+            })
+            .assertNext(result -> {
+                assertEquals(1, result.getTotal());
+                assertEquals(List.of(1), result.getData());
+            })
+            .verifyComplete();
+
+        assertSame(scopes.get(0), scopes.get(1));
+    }
+
+    @Test
+    public void testSequentialPagerReusesPreparationAndResubscriptionGetsFreshScope() {
+        QueryParamEntity source = QueryParamEntity.of();
+        AtomicInteger loaded = new AtomicInteger();
+        List<QueryOperationContext> scopes = new ArrayList<>();
+        ReactiveQuery<Integer> query = mockPreparedQuery(
+            () -> Mono.fromSupplier(loaded::incrementAndGet),
+            scopes);
+        Mono<PagerResult<Integer>> pager = QueryHelper.queryPager(source, () -> query);
+
+        StepVerifier.create(pager)
+            .assertNext(result -> {
+                assertEquals(1, result.getTotal());
+                assertEquals(List.of(1), result.getData());
+            })
+            .verifyComplete();
+        StepVerifier.create(pager)
+            .assertNext(result -> {
+                assertEquals(2, result.getTotal());
+                assertEquals(List.of(2), result.getData());
+            })
+            .verifyComplete();
+
+        assertEquals(2, loaded.get());
+        assertSame(scopes.get(0), scopes.get(1));
+        assertSame(scopes.get(2), scopes.get(3));
+        assertFalse(scopes.get(0) == scopes.get(2));
+    }
 
     @Test
     public void testWarnPolicyKeepsExplicitLargePageForCompatibility() {
@@ -266,6 +368,21 @@ public class QueryHelperPagerTest {
         assertEquals(total, result.getTotal());
         assertEquals(pageSize, result.getPageSize());
         assertEquals(dataSize, result.getData().size());
+    }
+
+    @SuppressWarnings("unchecked")
+    private static ReactiveQuery<Integer> mockPreparedQuery(Supplier<Mono<Integer>> loader,
+                                                           List<QueryOperationContext> scopes) {
+        ReactiveQuery<Integer> query = mock(ReactiveQuery.class);
+        when(query.setParam(any(QueryParam.class))).thenReturn(query);
+        Mono<Integer> preparation = Mono.deferContextual(context -> {
+            QueryOperationContext scope = QueryOperationContext.current(context).orElseThrow();
+            scopes.add(scope);
+            return scope.memoize(new QueryOperationContext.Key<>(Integer.class, "metadata"), loader);
+        });
+        when(query.count()).thenReturn(preparation);
+        when(query.fetch()).thenReturn(preparation.flux());
+        return query;
     }
 
     @SuppressWarnings("unchecked")

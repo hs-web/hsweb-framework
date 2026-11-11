@@ -25,7 +25,9 @@ public interface EnableCacheReactiveCrudService<E, K> extends ReactiveCrudServic
     String ALL_DATA_KEY = "@all";
 
     default Mono<E> findById(K id) {
-        return this.getCache().getMono("id:" + id, () -> ReactiveCrudService.super.findById(id));
+        return Mono.defer(() -> getRepository().isResultCacheable()
+            ? getCache().getMono("id:" + id, () -> ReactiveCrudService.super.findById(id))
+            : ReactiveCrudService.super.findById(id));
     }
 
     @Override

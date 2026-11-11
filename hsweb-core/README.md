@@ -76,6 +76,8 @@ public class User  {
 
 所有的字典都会注册到:`DictDefineRepository`,可通过此类去获取字典,以提供给前端或者其他地方使用.
 
+`EnumDict.isEnabled()` 表示选项是否允许新选择，静态枚举默认 true。动态字典项通过已有 status（1 启用、0 禁用）实现；可通过 DictDefineRepository 统一读取，无需依赖字典内部 Service。该标志不改变字典值、ordinal、已有序列化或历史值解码，也不会自动在所有消费者中新增过滤。采用字段级稳定编码的消费者应自行保存映射，不将可变化的字典 ordinal 当作持久化位位置。
+
 ## ToString
 ``org.hswebframework.web.bean.ToString``提供了对Bean转为String的功能.包括字段脱敏(打码).
 

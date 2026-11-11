@@ -62,6 +62,15 @@ public interface EnumDict<V> extends JSONSerializable, Serializable {
     V getValue();
 
     /**
+     * Whether this option may be selected for a new value. Historical values can still be decoded.
+     * Static enum options are enabled by default; dynamic dictionaries may override this flag.
+     * @since 5.0.3
+     */
+    default boolean isEnabled() {
+        return true;
+    }
+
+    /**
      * 枚举字典选项的文本,通常为中文
      *
      * @return 枚举的文本
