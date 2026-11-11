@@ -42,7 +42,7 @@ public class GenericReactiveCacheSupportCrudServiceTest {
 
     @Before
     public void countRealSql() {
-        sql = new CountingReactiveSqlExecutor(database.getMetadata().getTable("s_test").orElseThrow());
+        sql = new CountingReactiveSqlExecutor(database.getMetadata());
     }
 
     @After
@@ -80,6 +80,53 @@ public class GenericReactiveCacheSupportCrudServiceTest {
         sql.reset();
         entityService.findById(entity.getId()).block();
         assertEquals(0, sql.count("select"));
+    }
+
+    @Test
+    public void cacheSafeTransformationRetainsCacheHitsAndWriteInvalidation() {
+        TestEntity entity = TestEntity.of("source", 10, "cache-pure");
+        entityService.insert(entity).block();
+        var table = database.getMetadata().getTable("s_test").orElseThrow();
+        table.addFeature(new ReactiveQueryResultTransformer() {
+            @Override
+            public boolean isResultCacheable() {
+                return true;
+            }
+
+            @Override
+            public <T> Flux<T> transform(Flux<T> rows, ReactiveQueryResultContext context) {
+                return rows.doOnNext(row -> {
+                    TestEntity value = (TestEntity) row;
+                    value.setName("cached:" + value.getName());
+                });
+            }
+        });
+        try {
+            assertTrue(entityService.getRepository().isResultCacheable());
+            assertEquals("cached:source", entityService.findById(entity.getId()).block().getName());
+            assertEquals("cached:source", entityService.getCacheAll().filter(row -> entity.getId().equals(row.getId()))
+                .single().block().getName());
+            assertEquals("cached:source", entityService.getCache().getMono("id:" + entity.getId()).block().getName());
+            sql.reset();
+            for (String view : List.of("scope-A", "scope-B")) {
+                assertEquals("cached:source", entityService.findById(entity.getId())
+                    .contextWrite(context -> context.put("view", view)).block().getName());
+                assertEquals("cached:source", entityService.getCacheAll().filter(row -> entity.getId().equals(row.getId()))
+                    .single().contextWrite(context -> context.put("view", view)).block().getName());
+            }
+            assertEquals(0, sql.count("select"));
+
+            // 原写入失效必须同时移除 ID 和全量结果，重新读取时只转换一次。
+            entityService.updateById(entity.getId(), TestEntity.of("updated", 20, "cache-pure")).block();
+            sql.reset();
+            assertEquals("cached:updated", entityService.findById(entity.getId()).block().getName());
+            assertEquals("cached:updated", entityService.getCacheAll().filter(row -> entity.getId().equals(row.getId()))
+                .single().block().getName());
+            assertEquals(2, sql.count("select"));
+        } finally {
+            table.getFeatures().remove(ReactiveQueryResultTransformer.ID_VALUE);
+            entityService.getCache().clear().block();
+        }
     }
 
     @Test
