@@ -12,6 +12,12 @@ import java.util.LinkedList;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * 基于 Reactor 上下文的响应式切换实现。
+ *
+ * @deprecated 动态切换能力已弃用，仅为已有调用保留。
+ */
+@Deprecated
 @Slf4j
 public class DefaultReactiveSwitcher implements ReactiveSwitcher {
 

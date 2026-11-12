@@ -1,5 +1,11 @@
 package org.hswebframework.web.datasource.switcher;
 
+/**
+ * 数据库 Schema 切换接口。
+ *
+ * @deprecated 动态切换能力已弃用，仅为已有调用保留。
+ */
+@Deprecated
 public interface SchemaSwitcher {
     /**
      * 使用上一次调用的数据源
