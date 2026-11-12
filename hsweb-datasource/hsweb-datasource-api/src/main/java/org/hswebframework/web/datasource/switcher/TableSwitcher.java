@@ -5,7 +5,9 @@ package org.hswebframework.web.datasource.switcher;
  *
  * @author zhouhao
  * @since 3.0.0-RC
+ * @deprecated 动态切换能力已弃用，仅为已有调用保留。
  */
+@Deprecated
 public interface TableSwitcher {
     void use(String source, String target);
 

@@ -1,7 +1,7 @@
 name: Auto Deploy 5.x to the Maven Repository
 on:
   push:
-    branches: ["5.0.x"]
+    branches: ["5.0.x", "5.0.3"]
 
 jobs:
   publish:
@@ -22,7 +22,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Cache Maven Repository
-        uses: actions/cache@v3
+        uses: actions/cache@v4.2.3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
@@ -45,4 +45,4 @@ jobs:
 
           # Step 4: 构建并发布到 Maven 私有仓库
       - name: Build and Deploy to Maven
-        run: mvn clean deploy -DskipTests -pl "$(./changes.sh)"
+        run: mvn clean deploy -DskipTests

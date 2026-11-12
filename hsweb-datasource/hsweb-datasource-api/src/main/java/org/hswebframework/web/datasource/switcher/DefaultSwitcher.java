@@ -8,6 +8,12 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Optional;
 
+/**
+ * 基于当前上下文的同步切换实现。
+ *
+ * @deprecated 动态切换能力已弃用，仅为已有调用保留。
+ */
+@Deprecated
 @Slf4j
 public class DefaultSwitcher implements Switcher {
 

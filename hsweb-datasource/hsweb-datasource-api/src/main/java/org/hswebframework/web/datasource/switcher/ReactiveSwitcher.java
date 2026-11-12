@@ -3,6 +3,12 @@ package org.hswebframework.web.datasource.switcher;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+/**
+ * 响应式数据源或 Schema 切换接口。
+ *
+ * @deprecated 动态切换能力已弃用，仅为已有调用保留。
+ */
+@Deprecated
 public interface ReactiveSwitcher {
 
     <P extends Publisher<?>> P useLast(P publisher);

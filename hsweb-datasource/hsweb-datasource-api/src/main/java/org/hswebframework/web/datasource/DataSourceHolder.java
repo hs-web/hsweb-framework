@@ -33,11 +33,18 @@ public final class DataSourceHolder {
 
     /**
      * @return 动态数据源切换器
+     * @deprecated 动态切换能力已弃用，仅为已有调用保留。
      */
+    @Deprecated
     public static JdbcSwitcher switcher() {
         return jdbcSwitcher;
     }
 
+    /**
+     * @return 响应式动态数据源切换器
+     * @deprecated 动态切换能力已弃用，仅为已有调用保留。
+     */
+    @Deprecated
     public static R2dbcSwitcher r2dbcSwitcher() {
         return r2dbcSwitcher;
     }

@@ -32,7 +32,9 @@ import static org.hswebframework.web.datasource.strategy.AnnotationDataSourceSwi
  *
  * @author zhouhao
  * @since 3.0
+ * @deprecated 动态切换能力已弃用，仅为已有调用保留。
  */
+@Deprecated
 @Configuration(proxyBeanMethods = false)
 @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class AopDataSourceSwitcherAutoConfiguration {
