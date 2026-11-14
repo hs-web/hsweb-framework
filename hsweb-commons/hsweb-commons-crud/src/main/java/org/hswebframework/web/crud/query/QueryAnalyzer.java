@@ -132,13 +132,15 @@ public interface QueryAnalyzer {
             if (columns == null) {
                 synchronized (this) {
                     if (columns == null) {
-                        columns = new HashMap<>();
+                        Map<String, Column> mappings = new HashMap<>();
                         for (Column column : columnList) {
-                            columns.put(column.name, column);
-                            columns.put(column.alias, column);
-                            columns.put(column.getFullName(), column);
-                            columns.put(QueryHelperUtils.toSnake(column.alias), column);
+                            mappings.put(column.name, column);
+                            mappings.put(column.alias, column);
+                            mappings.put(column.getFullName(), column);
+                            mappings.put(QueryHelperUtils.toSnake(column.alias), column);
                         }
+                        // 查询器跨线程复用，完整构建后再发布，避免首次并发查询误判列不存在。
+                        columns = mappings;
                     }
                 }
             }
