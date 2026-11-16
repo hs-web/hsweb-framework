@@ -359,7 +359,7 @@ public final class FastBeanCopier {
             String name = component.getName();
             Class<?> type = component.getType();
             String typeName = getTypeName(type);
-            String varName = "$$__" + name;
+            String varName = "$$__component" + constructorArgs.size();
             code.append(typeName).append(" ").append(varName).append("=").append(defaultValueCode(type)).append(";\n\t");
             code.append("if(!ignore.contains(\"").append(name).append("\")){\n\t\t");
 

@@ -11,6 +11,15 @@ import static org.junit.Assert.*;
 
 public class FastBeanCopierTypedMapTest {
     @Test
+    public void recordComponentNamesCannotCollideWithGeneratedSourceOrValueVariables() {
+        var result = FastBeanCopier.copy(Map.of("source", "input", "value", Map.of("limit", 100)), Binding.class);
+        assertEquals("input", result.source());
+        assertEquals(Map.of("limit", 100), result.value());
+        var copied = FastBeanCopier.copy(result, Binding.class);
+        assertEquals(result, copied);
+    }
+
+    @Test
     public void recordMapsRestoreTypedKeysAndValuesWithoutChangingTheSource() {
         Map<String, Object> entries = new LinkedHashMap<>();
         entries.put("2", Map.of("name", "second"));
@@ -53,4 +62,5 @@ public class FastBeanCopierTypedMapTest {
     public record Item(String name) { }
     public record Envelope(Map<Integer, Item> entries) { }
     public record Fields(Map<String, Object> fields) { }
+    public record Binding(String source, Object value) { }
 }
