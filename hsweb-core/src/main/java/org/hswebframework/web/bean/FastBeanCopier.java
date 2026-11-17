@@ -359,7 +359,7 @@ public final class FastBeanCopier {
             String name = component.getName();
             Class<?> type = component.getType();
             String typeName = getTypeName(type);
-            String varName = "$$__" + name;
+            String varName = "$$__component" + constructorArgs.size();
             code.append(typeName).append(" ").append(varName).append("=").append(defaultValueCode(type)).append(";\n\t");
             code.append("if(!ignore.contains(\"").append(name).append("\")){\n\t\t");
 
@@ -963,7 +963,15 @@ public final class FastBeanCopier {
                 //快速复制map
                 if (targetClass == Map.class) {
                     if (source instanceof Map) {
-                        return (T) copyMap(((Map<?, ?>) source));
+                        Map<?, ?> original = (Map<?, ?>) source;
+                        Map<Object, Object> result = (Map<Object, Object>) copyMap(original);
+                        if (genericType != null && genericType.length >= 2
+                            && (genericType[0] != Object.class || genericType[1] != Object.class)) {
+                            result.clear();
+                            original.forEach((key, value) -> result.put(
+                                convertMapElement(key, genericType[0]), convertMapElement(value, genericType[1])));
+                        }
+                        return (T) result;
                     }
                     if (source instanceof Collection) {
                         Map<Object, Object> map = new LinkedHashMap<>();
@@ -990,9 +998,14 @@ public final class FastBeanCopier {
 //            return null;
         }
 
+        private Object convertMapElement(Object value, Class<?> type) {
+            // 保持浅复制语义；只还原实际与泛型不符的结构值，不重建已有 DTO。
+            return value == null || type.isInstance(value) ? value : convert(value, type, EMPTY_CLASS_ARRAY);
+        }
+
         private Map<?, ?> copyMap(Map<?, ?> map) {
             if (map instanceof TreeMap) {
-                return new TreeMap<>(map);
+                return new TreeMap<>((SortedMap<?, ?>) map);
             }
 
             if (map instanceof LinkedHashMap) {
