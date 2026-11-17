@@ -1,11 +1,12 @@
 package org.hswebframework.web.authorization.simple.builder;
 
-import com.alibaba.fastjson.JSON;
 import jakarta.annotation.PostConstruct;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilder;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.simple.*;
+import org.jetlinks.json.Json;
+import org.jetlinks.json.JsonMapper;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -17,9 +18,21 @@ import static org.hswebframework.web.authorization.access.DataAccessConfig.Defau
 import static org.hswebframework.web.authorization.access.DataAccessConfig.DefaultType.OWN_CREATED;
 
 /**
+ * 创建共享 JSON 配置的数据权限构建器。转换器在初始化时注册，完成配置后再并发使用。
+ *
  * @author zhouhao
  */
 public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBuilderFactory {
+    private final JsonMapper mapper;
+
+    public SimpleDataAccessConfigBuilderFactory() {
+        this(Json.global());
+    }
+
+    /** 使用同一 JSON 配置创建数据权限构建器和默认转换器。 */
+    public SimpleDataAccessConfigBuilderFactory(JsonMapper mapper) {
+        this.mapper = Objects.requireNonNull(mapper, "mapper");
+    }
 
     private List<String> defaultSupportConvert = Arrays.asList(
             OWN_CREATED,
@@ -43,7 +56,7 @@ public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBui
     }
 
     protected DataAccessConfigConverter createJsonConfig(String supportType, Class<? extends AbstractDataAccessConfig> clazz) {
-        return createConfig(supportType, (action, config) -> JSON.parseObject(config, clazz));
+        return createConfig(supportType, (action, config) -> mapper.read(config, clazz));
     }
 
 
@@ -85,6 +98,6 @@ public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBui
 
     @Override
     public DataAccessConfigBuilder create() {
-        return new SimpleDataAccessConfigBuilder(converts);
+        return new SimpleDataAccessConfigBuilder(converts, mapper);
     }
 }

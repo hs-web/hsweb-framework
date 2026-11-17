@@ -6,6 +6,33 @@
 
 框架的 `core`、`commons`、`authentication`、`authentication-default`、`dictionary` 五组消息资源均在对应模块的 `src/main/resources/i18n/{模块}/messages_ja.properties` 提供日语翻译，覆盖已有中英文键名的并集，并保留消息参数占位符。资源编码沿用各模块惯例，由 `hsweb-starter` 的 `I18nConfiguration` 使用 UTF-8 加载；`ja-JP` 通过语言回退使用 `ja` 资源。
 
+## JSON 读写
+
+日志、设置和认证默认直接使用 `Json.global()`，实例发现、注册和生命周期由 json-facade 负责。
+Spring 应用通过 `json-facade-spring` 适配应用 ObjectMapper；命名规则、null、时间和字典行为
+跟随该配置，不再维护框架内部的另一份默认 mapper。
+
+```java
+JsonMapper mapper = Json.global();
+Map<String, Object> config = mapper.readAsMap("{\"enabled\":true}", Object.class);
+List<Integer> ports = mapper.readAsList("[1883,8883]", Integer.class);
+String json = mapper.write(config);
+```
+
+`readAsList` 指定元素类型，`readAsMap` 指定值类型并使用字符串键；嵌套泛型传入 `JsonType`。
+动态结构可用 `mapper.readTree(json).asObject()` / `.asArray()`；高频固定类型可缓存完整 `JsonType` 后调用 `read`。
+
+非 Spring 应用如需定制，应在首次使用前通过 `Json.registerGlobal(mapper)` 注册配置。
+Spring 全局初始化前不要使用默认入口；ObjectMapper/customizer 构造中也不要反向依赖全局。
+多个独立上下文关闭全局注册并显式传入各自 `JsonMapper`。模块元数据是一次性启动读取，
+在 `ModuleUtils` 初始化内通过 facade builder 创建局部 mapper，不预占应用全局位置。
+字典绑定复用 starter 的 Jackson 字典模块，脱离 starter 时由应用装配所需扩展。
+需要业务自定义注解、Module 或字段规则时，应在装配层配置 Provider，再将 `JsonMapper` 传给组件。
+现有 Jackson 注解继续由 Jackson2 处理；fastjson 专用注解不会自动转换为跨引擎规则。
+`EnumDictJSONDeserializer` 和原生 `write` 入口仅供兼容，已弃用；Jackson 扩展使用
+`EnumDictDeserializer`，普通读写使用 `JsonMapper`。兼容期仍依赖真实 fastjson，
+不要同时引入提供 `com.alibaba.fastjson` 同名类的兼容包。
+
 
 ### bean 复制工具
 `FastBeanCopier`类. 提供高效的bean复制.支持复杂结构,类型转换,集合泛型,支持bean到map,map到bean的复制.

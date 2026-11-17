@@ -1,9 +1,9 @@
 package org.hswebframework.web.utils;
 
-import com.alibaba.fastjson.JSON;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.jetlinks.json.Json;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.ClassUtils;
@@ -36,9 +36,15 @@ public abstract class ModuleUtils {
         try {
             log.info("init module info");
             Resource[] resources = new PathMatchingResourcePatternResolver().getResources("classpath*:/hsweb-module.json");
+            // 元数据可先于 Spring 读取：局部实例由 facade 构建，不预占应用全局位置。
+            var mapper = Json.builder().provider("jackson2").build();
             for (Resource resource : resources) {
                 String classPath = getClassPath(resource.getURL().toString(), "hsweb-module.json");
-                ModuleInfo moduleInfo = JSON.parseObject(resource.getInputStream(), ModuleInfo.class);
+                ModuleInfo moduleInfo;
+                // 门面不关闭借用输入，资源创建方在这里负责关闭模块信息流。
+                try (var input = resource.getInputStream()) {
+                    moduleInfo = mapper.read(input, ModuleInfo.class);
+                }
                 moduleInfo.setClassPath(classPath);
                 ModuleUtils.register(moduleInfo);
             }
