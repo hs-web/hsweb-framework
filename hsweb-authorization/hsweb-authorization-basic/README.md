@@ -57,6 +57,8 @@ public ResponseMessage<Boolean> updatePassword(String password){
 ## rbac权限控制
 默认对注解`Authorize`进行实现,具体功能,请查看源代码
 
+方法级 `@Resource(merge = false)` 替换继承的类级资源声明，方法级资源及 `@QueryAction` 等动作仍一并保留；默认 `merge = true` 保留原有合并行为。资源覆盖只影响资源定义，不清除维度条件。解析时先确定方法资源，再绑定动作，避免依赖注解遍历顺序。
+
 ## 数据权限
 原理: 通过用户的权限信息,对aop拦截到的参数进行操作
 
