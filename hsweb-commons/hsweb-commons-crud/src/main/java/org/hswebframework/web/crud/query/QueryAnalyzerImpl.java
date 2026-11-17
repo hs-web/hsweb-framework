@@ -114,7 +114,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         if (columnMappings == null) {
             synchronized (this) {
                 if (columnMappings == null) {
-                    columnMappings = new HashMap<>();
+                    Map<String, Column> mappings = new HashMap<>();
 
                     if (select.table instanceof SelectTable) {
 
@@ -122,33 +122,33 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                             ((SelectTable) select.getTable()).getColumns().entrySet()) {
                             Column column = entry.getValue();
                             Column col = new Column(column.getName(), column.getAlias(), select.table.alias, column.metadata);
-                            columnMappings.put(entry.getKey(), col);
-                            columnMappings.put(select.table.alias + "." + entry.getKey(), col);
+                            mappings.put(entry.getKey(), col);
+                            mappings.put(select.table.alias + "." + entry.getKey(), col);
 
                             if (!(column instanceof ExpressionColumn) && column.metadata != null) {
-                                columnMappings.put(column.metadata.getName(), col);
-                                columnMappings.put(select.table.alias + "." + column.metadata.getName(), col);
-                                columnMappings.put(column.metadata.getAlias(), col);
-                                columnMappings.put(select.table.alias + "." + column.metadata.getAlias(), col);
+                                mappings.put(column.metadata.getName(), col);
+                                mappings.put(select.table.alias + "." + column.metadata.getName(), col);
+                                mappings.put(column.metadata.getAlias(), col);
+                                mappings.put(select.table.alias + "." + column.metadata.getAlias(), col);
                             }
                         }
 
                         for (Column column : select.getColumnList()) {
-                            columnMappings.put(column.getName(), column);
-                            columnMappings.put(column.getAlias(), column);
+                            mappings.put(column.getName(), column);
+                            mappings.put(column.getAlias(), column);
                             if (null != column.getOwner()) {
-                                columnMappings.put(column.getOwner() + "." + column.getName(), column);
-                                columnMappings.put(column.getOwner() + "." + column.getAlias(), column);
+                                mappings.put(column.getOwner() + "." + column.getName(), column);
+                                mappings.put(column.getOwner() + "." + column.getAlias(), column);
                             }
                         }
                     } else {
                         // 主表
                         for (RDBColumnMetadata column : select.table.metadata.getColumns()) {
                             Column col = new Column(column.getName(), column.getAlias(), select.table.alias, column);
-                            columnMappings.put(column.getName(), col);
-                            columnMappings.put(column.getAlias(), col);
-                            columnMappings.put(select.table.alias + "." + column.getName(), col);
-                            columnMappings.put(select.table.alias + "." + column.getAlias(), col);
+                            mappings.put(column.getName(), col);
+                            mappings.put(column.getAlias(), col);
+                            mappings.put(select.table.alias + "." + column.getName(), col);
+                            mappings.put(select.table.alias + "." + column.getAlias(), col);
                         }
                     }
 
@@ -156,23 +156,25 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                     for (Join join : joins.values()) {
                         if (join.table instanceof SelectTable) {
                             for (Column column : select.getColumnList()) {
-                                columnMappings.putIfAbsent(column.getName(), column);
-                                columnMappings.putIfAbsent(column.getAlias(), column);
-                                columnMappings.put(column.getOwner() + "." + column.getName(), column);
-                                columnMappings.put(column.getOwner() + "." + column.getAlias(), column);
+                                mappings.putIfAbsent(column.getName(), column);
+                                mappings.putIfAbsent(column.getAlias(), column);
+                                mappings.put(column.getOwner() + "." + column.getName(), column);
+                                mappings.put(column.getOwner() + "." + column.getAlias(), column);
                             }
                         } else {
                             for (RDBColumnMetadata column : join.table.metadata.getColumns()) {
                                 Column col = new Column(column.getName(), column.getAlias(), join.alias, column);
-                                columnMappings.putIfAbsent(column.getName(), col);
-                                columnMappings.putIfAbsent(column.getAlias(), col);
+                                mappings.putIfAbsent(column.getName(), col);
+                                mappings.putIfAbsent(column.getAlias(), col);
 
-                                columnMappings.put(join.alias + "." + column.getName(), col);
-                                columnMappings.put(join.alias + "." + column.getAlias(), col);
+                                mappings.put(join.alias + "." + column.getName(), col);
+                                mappings.put(join.alias + "." + column.getAlias(), col);
                             }
                         }
 
                     }
+                    // 不让共享查询器的其他线程读到尚未完成的索引。
+                    columnMappings = mappings;
                 }
             }
         }
