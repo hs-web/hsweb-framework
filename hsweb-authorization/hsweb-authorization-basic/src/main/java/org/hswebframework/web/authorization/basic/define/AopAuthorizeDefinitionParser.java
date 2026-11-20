@@ -81,10 +81,17 @@ public class AopAuthorizeDefinitionParser {
     }
 
     private void initMethodAnnotation() {
+        // merge=false 替换的是继承的资源集合，而不仅是同 ID 资源的动作。
+        if (methodAnnotationGroup.getOrDefault(Resource.class, Collections.emptyList())
+                                 .stream()
+                                 .map(Resource.class::cast)
+                                 .anyMatch(resource -> !resource.merge())) {
+            definition.getResources().clear();
+        }
+        for (Annotation annotation : methodAnnotationGroup.getOrDefault(Authorize.class, Collections.emptyList())) {
+            definition.putAnnotation((Authorize) annotation);
+        }
         for (Annotation annotation : methodAnnotation) {
-            if (annotation instanceof Authorize) {
-                definition.putAnnotation(((Authorize) annotation));
-            }
             if (annotation instanceof Resource) {
                 definition.putAnnotation(((Resource) annotation));
             }
@@ -94,15 +101,13 @@ public class AopAuthorizeDefinitionParser {
             if (annotation instanceof Dimensions) {
                 definition.putAnnotation(((Dimensions) annotation));
             }
-
-            if (annotation instanceof ResourceAction) {
-                getAnnotationByType(Resource.class)
-                    .map(res -> definition.getResources().getResource(res.id()).orElse(null))
-                    .filter(Objects::nonNull)
-                    .forEach(res -> {
-                        definition.putAnnotation(res, (ResourceAction) annotation);
-                    });
-            }
+        }
+        // 动作必须绑定到最终资源，不能依赖 HashSet 中注解的遍历顺序。
+        for (Annotation annotation : methodAnnotationGroup.getOrDefault(ResourceAction.class, Collections.emptyList())) {
+            getAnnotationByType(Resource.class)
+                .map(res -> definition.getResources().getResource(res.id()).orElse(null))
+                .filter(Objects::nonNull)
+                .forEach(res -> definition.putAnnotation(res, (ResourceAction) annotation));
         }
     }
 
