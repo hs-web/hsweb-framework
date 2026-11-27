@@ -62,6 +62,13 @@ public class I18nSupportException extends TraceSourceException {
     }
 
     public String getLocalizedMessage(Locale locale) {
+        return resolveLocalizedMessage(locale, args);
+    }
+
+    /**
+     * 子类可调整回退策略；默认 originalMessage 仍按本地消息模板解析。
+     */
+    protected String resolveLocalizedMessage(Locale locale, Object[] args) {
         return LocaleUtils.resolveMessage(i18nCode, locale, getOriginalMessage(), args);
     }
 
