@@ -30,6 +30,7 @@ import org.hswebframework.web.crud.query.QueryHelper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -66,17 +67,23 @@ public class EasyormConfiguration {
         return eventListener;
     }
 
+    /**
+     * 汇总 Feature 后由平台分发器占用默认事件监听 ID，扩展监听器通过分发器参与事件链。
+     */
     @Bean
     @ConditionalOnMissingBean
     @SuppressWarnings("all")
     public RDBDatabaseMetadata databaseMetadata(Optional<SyncSqlExecutor> syncSqlExecutor,
                                                 Optional<ReactiveSqlExecutor> reactiveSqlExecutor,
                                                 ObjectProvider<Feature> features,
-                                                EasyormProperties properties) {
+                                                EasyormProperties properties,
+                                                @Qualifier("easyormEventListener") EventListener eventListener) {
         RDBDatabaseMetadata metadata = properties.createDatabaseMetadata();
         syncSqlExecutor.ifPresent(metadata::addFeature);
         reactiveSqlExecutor.ifPresent(metadata::addFeature);
         features.forEach(metadata::addFeature);
+        // 扩展监听器可能使用默认 Feature ID，最后注册分发器以保留完整事件链。
+        metadata.addFeature(eventListener);
 
         if (properties.isAutoDdl() && reactiveSqlExecutor.isPresent()) {
             for (RDBSchemaMetadata schema : metadata.getSchemas()) {

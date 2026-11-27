@@ -26,8 +26,16 @@ import jakarta.annotation.PostConstruct;
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestApplication.class)
+@SpringBootTest(classes = {TestApplication.class, EntityEventListenerTest.DefaultListenerConfiguration.class})
 public class EntityEventListenerTest {
+
+    @org.springframework.boot.test.context.TestConfiguration
+    static class DefaultListenerConfiguration {
+        @Bean
+        org.hswebframework.ezorm.rdb.events.EventListener extensionListener() {
+            return (type, context) -> { };
+        }
+    }
 
     @Autowired
     private ReactiveRepository<EventTestEntity, String> reactiveRepository;
@@ -82,6 +90,21 @@ public class EntityEventListenerTest {
             .expectComplete()
             .verify();
 
+    }
+
+    @Test
+    public void testUpdateByIdPreservesEntityEventsWithDefaultIdListener() {
+        EventTestEntity entity = EventTestEntity.of("update-by-id", 10);
+        reactiveRepository.insert(entity).block();
+        EventTestEntity patch = new EventTestEntity();
+        patch.setAge(20);
+
+        assertEquals(Integer.valueOf(1), reactiveRepository.updateById(entity.getId(), Mono.just(patch)).block());
+        assertEquals(1, listener.modified.get());
+        assertEquals(1, listener.beforeModify.get());
+        EventTestEntity saved = reactiveRepository.findById(entity.getId()).block();
+        assertEquals("update-by-id", saved.getName());
+        assertEquals(Integer.valueOf(20), saved.getAge());
     }
 
     @Test
