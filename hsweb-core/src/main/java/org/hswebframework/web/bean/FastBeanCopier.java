@@ -1,7 +1,6 @@
 package org.hswebframework.web.bean;
 
 import com.google.common.collect.Maps;
-import io.netty.util.internal.ConcurrentSet;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -22,6 +21,7 @@ import org.springframework.util.ReflectionUtils;
 
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.beans.Transient;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -29,7 +29,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.RecordComponent;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -135,7 +134,7 @@ public final class FastBeanCopier {
             return ((Map<?, ?>) source).get(key);
         }
         SingleValueMap<Object, Object> map = new SingleValueMap<>();
-        copy(source, map, include(key));
+        getCopier(source, map, true).copy(source, map, include(key), DEFAULT_CONVERT);
         return map.getValue();
     }
 
@@ -149,6 +148,11 @@ public final class FastBeanCopier {
 
     @SneakyThrows
     public static <T, S> T copy(S source, Class<T> target, String... ignore) {
+        if (Throwable.class.isAssignableFrom(target)) {
+            Set<String> ignored = ignore == null || ignore.length == 0
+                ? Collections.emptySet() : new HashSet<>(Arrays.asList(ignore));
+            return copyToThrowable(source, target, DEFAULT_CONVERT, ignored);
+        }
         if (target.isRecord()) {
             return copyToRecord(source, target, DEFAULT_CONVERT, ignore);
         }
@@ -164,10 +168,29 @@ public final class FastBeanCopier {
     }
 
     @SuppressWarnings("all")
-    public static <T, S> T copy(S source, T target, Converter converter, Set<String> ignore) {
+    public static <T, S> T copy(S source, T target, Converter converter, Set<String> ignored) {
+        Set<String> ignore = ignored == null ? Collections.emptySet() : ignored;
+        if (target instanceof Throwable) {
+            // 异常的消息等属性不能通过 setter 修改，返回转换后的异常。
+            return (T) copyToThrowable(source, getUserClass(target), converter, ignore);
+        }
         if (target != null && getUserClass(target).isRecord()) {
             // record 不可变，无法写入已存在实例；这里按组件名重新构造并返回新实例。
             return (T) copyToRecord(source, (Class) getUserClass(target), converter, ignore);
+        }
+        if (source instanceof Throwable && target instanceof Map) {
+            ExceptionConverterHolder.INSTANCE.toMap((Throwable) source, (name, supplier) -> {
+                if (!ignore.contains(name)) {
+                    Object value = supplier.get();
+                    if (value != null) {
+                        Object converted = converter.convert(value, Object.class, EMPTY_CLASS_ARRAY);
+                        if (converted != null) {
+                            ((Map) target).put(name, converted);
+                        }
+                    }
+                }
+            });
+            return target;
         }
         if (source instanceof Map && target instanceof Map) {
             if (CollectionUtils.isEmpty(ignore)) {
@@ -186,6 +209,20 @@ public final class FastBeanCopier {
         getCopier(source, target, true)
             .copy(source, target, ignore, converter);
         return target;
+    }
+
+    private static <T> T copyToThrowable(Object source, Class<T> target, Converter converter, Set<String> ignore) {
+        if (source instanceof Map && !CollectionUtils.isEmpty(ignore)) {
+            source = Maps.filterKeys((Map<?, ?>) source, name -> !ignore.contains(name));
+        }
+        return converter.convert(source, target, EMPTY_CLASS_ARRAY);
+    }
+
+    private static class ExceptionConverterHolder {
+        private static final ExceptionConverter INSTANCE = ServiceLoader
+            .load(ExceptionConverter.class)
+            .findFirst()
+            .orElseGet(DefaultExceptionConverter::new);
     }
 
     static <T, S> T copyToRecord(S source, Class<T> target, Converter converter, String... ignore) {
@@ -228,6 +265,10 @@ public final class FastBeanCopier {
     }
 
     static Class<?> getUserClass(Object object) {
+        // 单属性读取使用独立的 copier，不应用 Map 导出时的属性过滤。
+        if (object instanceof SingleValueMap) {
+            return SingleValueMap.class;
+        }
         if (object instanceof Map) {
             return Map.class;
         }
@@ -424,6 +465,9 @@ public final class FastBeanCopier {
             }
         } else if (targetIsMap) {
             sourceProperties = createProperty(source, false);
+            if (target != SingleValueMap.class) {
+                sourceProperties.values().removeIf(property -> property.isTransient(source));
+            }
             targetProperties = createMapProperty(sourceProperties);
         } else {
             targetProperties = createProperty(target, true);
@@ -440,12 +484,14 @@ public final class FastBeanCopier {
                 //复制到拓展对象
                 if (targetIsExtendable && !sourceIsExtendable && !sourceIsMap) {
                     code.append("if(!ignore.contains(\"").append(sourceProperty.getName()).append("\")){\n\t");
+                    code.append(sourceProperty.generateVar("$$__value")).append("=$$__source.")
+                        .append(sourceProperty.getReadMethod()).append(";\n");
                     if (!sourceProperty.isPrimitive()) {
-                        code.append("if($$__source.").append(sourceProperty.getReadMethod()).append("!=null){\n");
+                        code.append("if($$__value!=null){\n");
                     }
                     code.append("\t\t((org.hswebframework.ezorm.core.Extendable)$$__target).setExtension(")
                         .append("\"").append(sourceProperty.name).append("\",")
-                        .append("$$__source.").append(sourceProperty.getReadMethod())
+                        .append("$$__value")
                         .append(");");
                     if (!sourceProperty.isPrimitive()) {
                         code.append("\n\t}");
@@ -455,8 +501,10 @@ public final class FastBeanCopier {
                 continue;
             }
             code.append("if(!ignore.contains(\"").append(sourceProperty.getName()).append("\")){\n\t");
+            code.append(sourceProperty.generateVar("$$__value")).append("=$$__source.")
+                .append(sourceProperty.getReadMethod()).append(";\n");
             if (!sourceProperty.isPrimitive()) {
-                code.append("if($$__source.").append(sourceProperty.getReadMethod()).append("!=null){\n");
+                code.append("if($$__value!=null){\n");
             }
             code.append(targetProperty.generateVar(targetProperty.getName())).append("=")
                 .append(sourceProperty.generateGetter(target, targetProperty.getType()))
@@ -503,6 +551,13 @@ public final class FastBeanCopier {
         @Getter
         protected Class<?> beanType;
 
+        protected boolean transientProperty;
+
+        public boolean isTransient(Class<?> sourceType) {
+            Field field = ReflectionUtils.findField(sourceType, name);
+            return transientProperty || field != null && Modifier.isTransient(field.getModifiers());
+        }
+
         public String getReadMethod() {
             return readMethodName + "()";
         }
@@ -518,7 +573,7 @@ public final class FastBeanCopier {
         public String getTypeName(Class<?> type) {
             String targetTypeName = type.getName();
             if (type.isArray()) {
-                targetTypeName = type.getComponentType().getName() + "[]";
+                targetTypeName = getTypeName(type.getComponentType()) + "[]";
             }
             return targetTypeName;
         }
@@ -558,7 +613,7 @@ public final class FastBeanCopier {
         public BiFunction<Class<?>, Class<?>, String> createGetterFunction() {
 
             return (targetBeanType, targetType) -> {
-                String getterCode = "$$__source." + getReadMethod();
+                String getterCode = "$$__value";
 
                 String generic = "org.hswebframework.web.bean.FastBeanCopier.EMPTY_CLASS_ARRAY";
                 Field field = ReflectionUtils.findField(targetBeanType, name);
@@ -672,6 +727,7 @@ public final class FastBeanCopier {
     static class BeanClassProperty extends ClassProperty {
         public BeanClassProperty(PropertyDescriptor descriptor) {
             type = descriptor.getPropertyType();
+            transientProperty = Boolean.TRUE.equals(descriptor.getValue("transient"));
             readMethodName = descriptor.getReadMethod().getName();
             writeMethodName = descriptor.getWriteMethod() == null ? null : descriptor.getWriteMethod().getName();
 
@@ -691,6 +747,8 @@ public final class FastBeanCopier {
     static class RecordClassProperty extends ClassProperty {
         public RecordClassProperty(RecordComponent component) {
             type = component.getType();
+            Transient annotation = component.getAccessor().getAnnotation(Transient.class);
+            transientProperty = annotation != null && annotation.value();
             readMethodName = component.getAccessor().getName();
             writeMethodName = null;
 
@@ -831,6 +889,21 @@ public final class FastBeanCopier {
         public <T> T convert(Object source, Class<T> targetClass, Class[] genericType) {
             if (source == null) {
                 return null;
+            }
+            if (Throwable.class.isAssignableFrom(targetClass)) {
+                if (targetClass.isInstance(source)) {
+                    return (T) source;
+                }
+                if (!(source instanceof Map)) {
+                    throw new IllegalArgumentException("Cannot convert value to exception: " + targetClass.getName());
+                }
+                Throwable restored = ExceptionConverterHolder.INSTANCE.fromMap(
+                    (Map<String, ?>) source, (Class<? extends Throwable>) targetClass);
+                if (!targetClass.isInstance(restored)) {
+                    throw new UnsupportedOperationException("Exception converter returned an incompatible value for "
+                                                                + targetClass.getName());
+                }
+                return (T) restored;
             }
             ClassDescription target = ClassDescriptions.getDescription(targetClass);
 

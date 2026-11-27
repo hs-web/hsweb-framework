@@ -2,6 +2,7 @@ package org.hswebframework.web.exception;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.ConstraintViolation;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -76,7 +77,7 @@ public class ValidationException extends I18nSupportException {
         if (propertyI18nEnabled && "validation.property_validate_failed".equals(getI18nCode()) && getArgs().length > 0) {
             Object[] args = getArgs().clone();
             args[0] = LocaleUtils.resolveMessage(String.valueOf(args[0]), locale, String.valueOf(args[0]));
-            return LocaleUtils.resolveMessage(getI18nCode(), locale, getOriginalMessage(), args);
+            return resolveLocalizedMessage(locale, args);
         }
         return super.getLocalizedMessage(locale);
     }
@@ -84,7 +85,8 @@ public class ValidationException extends I18nSupportException {
     @Getter
     @Setter
     @AllArgsConstructor
-    public static class Detail {
+    public static class Detail implements Serializable {
+        private static final long serialVersionUID = 1L;
 
         @Schema(description = "字段")
         String property;
