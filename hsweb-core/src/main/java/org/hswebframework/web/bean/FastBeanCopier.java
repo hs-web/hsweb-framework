@@ -1037,14 +1037,14 @@ public final class FastBeanCopier {
                 if (targetClass == Map.class) {
                     if (source instanceof Map) {
                         Map<?, ?> original = (Map<?, ?>) source;
-                        Map<Object, Object> result = (Map<Object, Object>) copyMap(original);
                         if (genericType != null && genericType.length >= 2
                             && (genericType[0] != Object.class || genericType[1] != Object.class)) {
-                            result.clear();
+                            Map<Object, Object> result = newMap(original, genericType[0]);
                             original.forEach((key, value) -> result.put(
                                 convertMapElement(key, genericType[0]), convertMapElement(value, genericType[1])));
+                            return (T) result;
                         }
-                        return (T) result;
+                        return (T) copyMap(original);
                     }
                     if (source instanceof Collection) {
                         Map<Object, Object> map = new LinkedHashMap<>();
@@ -1074,6 +1074,27 @@ public final class FastBeanCopier {
         private Object convertMapElement(Object value, Class<?> type) {
             // 保持浅复制语义；只还原实际与泛型不符的结构值，不重建已有 DTO。
             return value == null || type.isInstance(value) ? value : convert(value, type, EMPTY_CLASS_ARRAY);
+        }
+
+        private Map<Object, Object> newMap(Map<?, ?> source, Class<?> keyType) {
+            if (source instanceof TreeMap<?, ?> sorted) {
+                // 比较器只适用于原键域。键转换后，Map 目标按原迭代顺序接收，不能沿用原比较器。
+                Set<?> keys = source.keySet();
+                // null 不参与转换；至少需要一个非空键样本才能确认比较器的键域。
+                if (keyType == Object.class
+                    || keys.stream().anyMatch(Objects::nonNull)
+                        && keys.stream().allMatch(key -> key == null || keyType.isInstance(key))) {
+                    return new TreeMap<>((Comparator<Object>) sorted.comparator());
+                }
+                return Maps.newLinkedHashMapWithExpectedSize(source.size());
+            }
+            if (source instanceof ConcurrentHashMap) {
+                return new ConcurrentHashMap<>(source.size());
+            }
+            if (source instanceof LinkedHashMap) {
+                return Maps.newLinkedHashMapWithExpectedSize(source.size());
+            }
+            return Maps.newHashMapWithExpectedSize(source.size());
         }
 
         private Map<?, ?> copyMap(Map<?, ?> map) {
