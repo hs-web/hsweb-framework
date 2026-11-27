@@ -45,6 +45,10 @@ ValidationException 的 details 以 property/message/detail 字段 Map 列表导
 
 约定: 如果属性类实现了`Cloneable`接口,在复制的时候将调用`clone`方法.所以如果你实现了`Cloneable`接口,就必须重写`clone`方法并且为`public`修饰的.
 
+### 异常诊断
+
+`TraceSourceException.toString()` 在异常显示名称为空时（例如匿名类、局部类）回退到二进制类名，避免诊断和堆栈输出触发空指针；普通命名类继续使用原 canonical name，消息及 Operation/Source 格式保持不变。
+
 ### 数据字典
 
 可通过枚举来定义数据字典,定义一个枚举,并实现`EnumDict`接口:
