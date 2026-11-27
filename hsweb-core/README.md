@@ -27,7 +27,15 @@
 
 实现位于 `hsweb-core/src/main/java/org/hswebframework/web/bean/FastBeanCopier.java`，使用独立的 `PropertyUtilsBean` 和内省扩展点，不修改全局 BeanUtils 配置，复用现有代码生成、类型转换和缓存。
 
-访问器回归由 `FastBeanCopierBeanTest`、`FastBeanCopierReadOnlyTest` 和 `FastBeanCopierTest` 覆盖，包括只读源属性、目标可写边界、不同访问器风格、继承泛型、忽略属性、record、全局配置隔离及静态访问器排除。
+Bean 属性复制每次只读取一次实际参与复制的源属性，空值保持现有跳过写入的语义；include/ignore 排除的属性不读取，getter 抛出的异常继续传播。Bean 转普通 Map 保持浅复制，嵌套的 Throwable 保留原引用，不自动展开、丢弃或转成字符串。
+
+Bean/record 转 Map 时排除 `transient` 字段（包含继承字段）及 JavaBeans `java.beans.Transient` 标记的属性，排除发生在调用 getter 前，显式 include 也不会导出这些属性。`@Transient(false)` 不排除属性，但不能覆盖字段上的 `transient`。此规则不影响 Bean→Bean、Map→Bean、Bean→record、Map→Map 和 `getProperty` 按名称取值。
+
+直接将 Throwable 转 Map（包括 `DEFAULT_CONVERT.convert(error, Map.class, ...)`）使用固定描述字段：`type` 为完整类名，`message` 为异常消息，`detail` 为含 cause/suppressed 的完整堆栈文本；`I18nSupportException` 另提供 `i18nCode`、`args`，`BusinessException` 另提供业务 `code`、`status`。参数保持浅复制及原类型；空值跳过，不再枚举异常的其他 getter 或携带原始 cause/suppressed/stackTrace 对象。include/ignore 在取值前应用，排除 detail 时不生成堆栈，值转换仍使用调用方的 Converter。Map 用于错误描述，异常的真实类型还原不依赖类名反射实例化。
+
+可在 `META-INF/services/org.hswebframework.web.bean.ExceptionToMapConverter` 注册自定义异常映射实现。首次异常转换时使用线程上下文 ClassLoader 发现的首个实现，每个运行环境应只注册一个；无实现时回退 `DefaultExceptionToMapConverter`。实例按 copier 的 ClassLoader 复用，自定义实现应无状态或线程安全。SPI 按字段提供延迟 Supplier，由 copier 统一过滤、读取及转换；继承默认实现并覆盖 `getDetail(Throwable)` 可复用上层平台的栈精简逻辑，自定义栈处理需保留循环引用处理，无需改变其他字段或引入反向依赖。
+
+访问器回归由 `FastBeanCopierBeanTest`、`FastBeanCopierReadOnlyTest`、`FastBeanCopierReadOnceTest`、`FastBeanCopierTransientTest` 和 `FastBeanCopierTest` 覆盖，包括只读源属性、单次取值、导出排除规则、目标可写边界、不同访问器风格、继承泛型、忽略属性、record、全局配置隔离及静态访问器排除。`FastBeanCopierExceptionTest` 与 `FastBeanCopierExceptionSpiTest` 覆盖异常描述、循环 cause、国际化字段、值转换和 SPI 发现及延迟取值。
 
 约定: 如果属性类实现了`Cloneable`接口,在复制的时候将调用`clone`方法.所以如果你实现了`Cloneable`接口,就必须重写`clone`方法并且为`public`修饰的.
 
