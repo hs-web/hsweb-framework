@@ -181,6 +181,10 @@ public class TraceSourceException extends RuntimeException {
     @Override
     public String toString() {
         String className = getExceptionName();
+        // 匿名类、局部类的 canonical name 为空，使用二进制类名作为显示回退。
+        if (className == null) {
+            className = getClass().getName();
+        }
         String message = this.getLocalizedMessage();
         String operation = this.operation;
         String source = Optional
