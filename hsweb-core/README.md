@@ -41,6 +41,8 @@ ValidationException 的 details 以 property/message/detail 字段 Map 列表导
 
 可在 `META-INF/services/org.hswebframework.web.bean.ExceptionConverter` 注册自定义双向实现（`toMap` / `fromMap`）。首次异常转换时使用线程上下文 ClassLoader 发现的首个实现，每个运行环境应只注册一个；无实现时回退 `DefaultExceptionConverter`。实例按 copier 的 ClassLoader 复用，自定义实现应无状态或线程安全。toMap 按字段提供延迟 Supplier，由 copier 统一过滤、读取及转换；继承默认实现并覆盖 `getDetail(Throwable)` 可精简原始异常的栈，自定义栈处理需保留循环引用处理。携带 RemoteExceptionMetadata 的异常直接沿用远端 detail，不再调用此栈渲染方法。fromMap 应返回与目标声明兼容的异常，copier 拒绝 null 或不兼容的 SPI 返回值。
 
+Map 泛型转换保持浅复制语义，仅转换与声明不符的键和值。TreeMap 的非空键样本均与目标键类型兼容时保留比较器，null 键不影响该判断；键类型转换后、空 Map 或仅含 null 键且目标声明了具体键类型时，目标 Map 保留原遍历顺序，不继承无法确认兼容的比较器。目标键类型为 Object 时键不转换，保留原比较器。
+
 访问器回归由 `FastBeanCopierBeanTest`、`FastBeanCopierReadOnlyTest`、`FastBeanCopierReadOnceTest`、`FastBeanCopierTransientTest` 和 `FastBeanCopierTest` 覆盖，包括只读源属性、单次取值、导出排除规则、目标可写边界、不同访问器风格、继承泛型、忽略属性、record、全局配置隔离及静态访问器排除。`FastBeanCopierExceptionTest`、`FastBeanCopierExceptionRestoreTest`、`FastBeanCopierExceptionSpiTest` 及 `RemoteExceptionI18nTest` 覆盖异常描述、循环 cause、受控还原、JSON 往返、国际化回退和重译、值转换及双向 SPI 发现。
 
 约定: 如果属性类实现了`Cloneable`接口,在复制的时候将调用`clone`方法.所以如果你实现了`Cloneable`接口,就必须重写`clone`方法并且为`public`修饰的.

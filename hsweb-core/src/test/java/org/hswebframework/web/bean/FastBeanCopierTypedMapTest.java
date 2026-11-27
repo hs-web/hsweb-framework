@@ -2,7 +2,11 @@ package org.hswebframework.web.bean;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,6 +61,72 @@ public class FastBeanCopierTypedMapTest {
         var concurrent = new ConcurrentHashMap<String, Object>(sorted);
         assertTrue(FastBeanCopier.DEFAULT_CONVERT.convert(concurrent, Map.class,
             new Class[]{String.class, Item.class}) instanceof ConcurrentHashMap);
+    }
+
+    @Test
+    public void convertedTreeMapKeysDoNotReuseTheOriginalKeyComparator() {
+        Comparator<String> comparator = (left, right) -> right.compareTo(left);
+        TreeMap<String, Object> source = new TreeMap<>(comparator);
+        source.put("10", Map.of("name", "ten"));
+        source.put("2", Map.of("name", "two"));
+
+        Map<Integer, Item> result = FastBeanCopier.copy(Map.of("entries", source), Envelope.class).entries();
+
+        assertTrue(result instanceof LinkedHashMap);
+        assertEquals(List.of(2, 10), new ArrayList<>(result.keySet()));
+        assertEquals("two", result.get(2).name());
+        assertEquals("ten", result.get(10).name());
+        assertEquals(List.of("2", "10"), new ArrayList<>(source.keySet()));
+        assertTrue(source.get("2") instanceof Map);
+        assertSame(comparator, source.comparator());
+    }
+
+    @Test
+    public void compatibleTreeMapKeysIncludingNullKeepTheirComparator() {
+        Comparator<Integer> comparator = Comparator.nullsFirst(Comparator.reverseOrder());
+        TreeMap<Integer, Object> source = new TreeMap<>(comparator);
+        source.put(null, Map.of("name", "none"));
+        source.put(2, Map.of("name", "two"));
+
+        Map<Integer, Item> result = FastBeanCopier.copy(Map.of("entries", source), Envelope.class).entries();
+
+        assertTrue(result instanceof TreeMap);
+        assertSame(comparator, ((TreeMap<Integer, Item>) result).comparator());
+        assertEquals("none", result.get(null).name());
+        result.put(3, new Item("three"));
+        assertEquals(Arrays.asList(null, 3, 2), new ArrayList<>(result.keySet()));
+        assertFalse(source.containsKey(3));
+    }
+
+    @Test
+    public void emptyAndNullOnlyMapsDoNotRetainAnUnknownKeyComparator() {
+        Comparator<String> comparator = Comparator.nullsFirst(String::compareTo);
+        TreeMap<String, Object> empty = new TreeMap<>(comparator);
+        TreeMap<String, Object> nullOnly = new TreeMap<>(comparator);
+        nullOnly.put(null, Map.of("name", "none"));
+
+        for (TreeMap<String, Object> source : List.of(empty, nullOnly)) {
+            Map<Integer, Item> result = FastBeanCopier.copy(Map.of("entries", source), Envelope.class).entries();
+            assertTrue(result instanceof LinkedHashMap);
+            result.put(1, new Item("one"));
+            assertFalse(source.containsKey("1"));
+        }
+        assertEquals("none", FastBeanCopier.copy(Map.of("entries", nullOnly), Envelope.class).entries().get(null).name());
+    }
+
+    @Test
+    public void objectKeyConversionRetainsTheComparatorWithoutKeySamples() {
+        Comparator<String> comparator = Comparator.nullsFirst(String::compareTo);
+        TreeMap<String, Object> source = new TreeMap<>(comparator);
+        source.put(null, Map.of("name", "none"));
+
+        Map<?, ?> result = FastBeanCopier.DEFAULT_CONVERT.convert(source, Map.class,
+            new Class[]{Object.class, Item.class});
+
+        assertTrue(result instanceof TreeMap);
+        assertSame(comparator, ((TreeMap<?, ?>) result).comparator());
+        assertEquals("none", ((Item) result.get(null)).name());
+        assertTrue(source.get(null) instanceof Map);
     }
 
     public record Item(String name) { }
