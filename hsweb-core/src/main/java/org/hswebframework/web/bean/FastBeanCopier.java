@@ -168,7 +168,8 @@ public final class FastBeanCopier {
     }
 
     @SuppressWarnings("all")
-    public static <T, S> T copy(S source, T target, Converter converter, Set<String> ignore) {
+    public static <T, S> T copy(S source, T target, Converter converter, Set<String> ignored) {
+        Set<String> ignore = ignored == null ? Collections.emptySet() : ignored;
         if (target instanceof Throwable) {
             // 异常的消息等属性不能通过 setter 修改，返回转换后的异常。
             return (T) copyToThrowable(source, getUserClass(target), converter, ignore);

@@ -18,6 +18,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.text.MessageFormat;
 
 public class RemoteExceptionI18nTest {
     private MessageSource previous;
@@ -108,6 +116,86 @@ public class RemoteExceptionI18nTest {
                     "message", "Sender text", "i18nCode", "unknown.remote.reason"), type);
                 Assert.assertEquals("Sender text", unknown.getMessage());
             });
+        }
+    }
+
+    @Test
+    public void untranslatedSenderTextIsLiteralEvenWithQuotesAndBraces() {
+        for (String type : List.of("remote.Unknown", I18nSupportException.class.getName(), BusinessException.class.getName(),
+                                  NotFoundException.class.getName(), ValidationException.class.getName())) {
+            for (String message : List.of("can't retry {0}", "JSON {\"port\":80}", "user 'alpha' {0}")) {
+                Throwable restored = FastBeanCopier.copy(Map.of("type", type, "message", message,
+                    "i18nCode", "unknown.remote.reason", "args", List.of(12)), Throwable.class);
+                Assert.assertEquals(message, restored.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public void messagesWithoutI18nCodeRemainLiteralWhenFormattingIsForced() {
+        ((StaticMessageSource) LocaleUtils.messageSource).setAlwaysUseMessageFormat(true);
+        for (String message : List.of("can't retry", "JSON {\"port\":80}")) {
+            Throwable restored = FastBeanCopier.copy(Map.of("type", "remote.Unknown", "message", message), Throwable.class);
+            Assert.assertEquals(message, restored.getMessage());
+        }
+    }
+
+    @Test
+    public void localFallbackTemplatesStillFormatNormally() {
+        Assert.assertEquals("Local 12", new I18nSupportException("Local {0}", 12).getMessage());
+    }
+
+    @Test
+    public void changingMessageSourceIsQueriedOnceAndNeverReformatsTheSenderText() {
+        AtomicInteger lookups = new AtomicInteger();
+        LocaleUtils.messageSource = new StaticMessageSource() {
+            @Override
+            protected MessageFormat resolveCode(String code, Locale locale) {
+                return lookups.incrementAndGet() == 1 ? new MessageFormat("Translated {0}", locale) : null;
+            }
+        };
+        String sender = "JSON {\"port\":80}";
+        Throwable restored = FastBeanCopier.copy(Map.of("type", ValidationException.class.getName(), "message", sender,
+            "i18nCode", "volatile.reason", "args", List.of(12)), Throwable.class);
+        Assert.assertEquals("Translated 12", restored.getMessage());
+        Assert.assertEquals(1, lookups.get());
+        Assert.assertEquals(sender, restored.getMessage());
+        Assert.assertEquals(2, lookups.get());
+    }
+
+    @Test
+    public void parallelLocalesAndRepeatedHopsDoNotLeakState() throws Exception {
+        ExecutorService workers = Executors.newFixedThreadPool(8);
+        CountDownLatch start = new CountDownLatch(1);
+        try {
+            List<Future<?>> tasks = new ArrayList<>();
+            for (int worker = 0; worker < 8; worker++) {
+                Locale locale = worker % 2 == 0 ? Locale.CHINESE : Locale.ENGLISH;
+                tasks.add(workers.submit(() -> {
+                    start.await();
+                    LocaleUtils.doWith(locale, ignored -> {
+                        Map<String, Object> source = Map.of("type", "remote.Concurrent", "message", "Sender",
+                            "detail", "remote stack", "i18nCode", "test.restore.reason", "args", List.of(12));
+                        for (int round = 0; round < 100; round++) {
+                            Throwable restored = FastBeanCopier.copy(source, Throwable.class);
+                            Assert.assertEquals(locale.equals(Locale.CHINESE) ? "拒绝 12" : "Rejected 12", restored.getMessage());
+                            Map<String, Object> forwarded = FastBeanCopier.copy(restored, new LinkedHashMap<>());
+                            Assert.assertEquals("remote.Concurrent", forwarded.get("type"));
+                            Assert.assertEquals("remote stack", forwarded.get("detail"));
+                            Assert.assertEquals(List.of(12), source.get("args"));
+                        }
+                    });
+                    return null;
+                }));
+            }
+            start.countDown();
+            for (Future<?> task : tasks) {
+                task.get(15, TimeUnit.SECONDS);
+            }
+        } finally {
+            start.countDown();
+            workers.shutdownNow();
+            Assert.assertTrue(workers.awaitTermination(15, TimeUnit.SECONDS));
         }
     }
 }
