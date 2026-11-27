@@ -1,7 +1,6 @@
 package org.hswebframework.web.bean;
 
 import com.google.common.collect.Maps;
-import io.netty.util.internal.ConcurrentSet;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -30,7 +29,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.RecordComponent;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -150,6 +148,11 @@ public final class FastBeanCopier {
 
     @SneakyThrows
     public static <T, S> T copy(S source, Class<T> target, String... ignore) {
+        if (Throwable.class.isAssignableFrom(target)) {
+            Set<String> ignored = ignore == null || ignore.length == 0
+                ? Collections.emptySet() : new HashSet<>(Arrays.asList(ignore));
+            return copyToThrowable(source, target, DEFAULT_CONVERT, ignored);
+        }
         if (target.isRecord()) {
             return copyToRecord(source, target, DEFAULT_CONVERT, ignore);
         }
@@ -166,12 +169,16 @@ public final class FastBeanCopier {
 
     @SuppressWarnings("all")
     public static <T, S> T copy(S source, T target, Converter converter, Set<String> ignore) {
+        if (target instanceof Throwable) {
+            // 异常的消息等属性不能通过 setter 修改，返回转换后的异常。
+            return (T) copyToThrowable(source, getUserClass(target), converter, ignore);
+        }
         if (target != null && getUserClass(target).isRecord()) {
             // record 不可变，无法写入已存在实例；这里按组件名重新构造并返回新实例。
             return (T) copyToRecord(source, (Class) getUserClass(target), converter, ignore);
         }
         if (source instanceof Throwable && target instanceof Map) {
-            ExceptionConverterHolder.INSTANCE.convert((Throwable) source, (name, supplier) -> {
+            ExceptionConverterHolder.INSTANCE.toMap((Throwable) source, (name, supplier) -> {
                 if (!ignore.contains(name)) {
                     Object value = supplier.get();
                     if (value != null) {
@@ -203,11 +210,18 @@ public final class FastBeanCopier {
         return target;
     }
 
+    private static <T> T copyToThrowable(Object source, Class<T> target, Converter converter, Set<String> ignore) {
+        if (source instanceof Map && !CollectionUtils.isEmpty(ignore)) {
+            source = Maps.filterKeys((Map<?, ?>) source, name -> !ignore.contains(name));
+        }
+        return converter.convert(source, target, EMPTY_CLASS_ARRAY);
+    }
+
     private static class ExceptionConverterHolder {
-        private static final ExceptionToMapConverter INSTANCE = ServiceLoader
-            .load(ExceptionToMapConverter.class)
+        private static final ExceptionConverter INSTANCE = ServiceLoader
+            .load(ExceptionConverter.class)
             .findFirst()
-            .orElseGet(DefaultExceptionToMapConverter::new);
+            .orElseGet(DefaultExceptionConverter::new);
     }
 
     static <T, S> T copyToRecord(S source, Class<T> target, Converter converter, String... ignore) {
@@ -874,6 +888,21 @@ public final class FastBeanCopier {
         public <T> T convert(Object source, Class<T> targetClass, Class[] genericType) {
             if (source == null) {
                 return null;
+            }
+            if (Throwable.class.isAssignableFrom(targetClass)) {
+                if (targetClass.isInstance(source)) {
+                    return (T) source;
+                }
+                if (!(source instanceof Map)) {
+                    throw new IllegalArgumentException("Cannot convert value to exception: " + targetClass.getName());
+                }
+                Throwable restored = ExceptionConverterHolder.INSTANCE.fromMap(
+                    (Map<String, ?>) source, (Class<? extends Throwable>) targetClass);
+                if (!targetClass.isInstance(restored)) {
+                    throw new UnsupportedOperationException("Exception converter returned an incompatible value for "
+                                                                + targetClass.getName());
+                }
+                return (T) restored;
             }
             ClassDescription target = ClassDescriptions.getDescription(targetClass);
 

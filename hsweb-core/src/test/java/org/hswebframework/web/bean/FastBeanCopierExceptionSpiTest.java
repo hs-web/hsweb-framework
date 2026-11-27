@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -23,7 +24,7 @@ public class FastBeanCopierExceptionSpiTest {
     @Test
     public void serviceLoaderCustomizesDetailAndKeepsFilteringLazy() throws Exception {
         Path root = Files.createTempDirectory("exception-map-spi");
-        String serviceName = "META-INF/services/" + ExceptionToMapConverter.class.getName();
+        String serviceName = "META-INF/services/" + ExceptionConverter.class.getName();
         Path service = root.resolve(serviceName);
         Files.createDirectories(service.getParent());
         Files.writeString(service, CustomConverter.class.getName());
@@ -77,6 +78,26 @@ public class FastBeanCopierExceptionSpiTest {
             Assert.assertEquals("custom", full.get("extra"));
             Assert.assertEquals("failed", full.get("message"));
             Assert.assertEquals(1, CustomConverter.detailReads);
+
+            Method restore = isolated.getMethod("copy", Object.class, Class.class, String[].class);
+            Throwable remote = (Throwable) restore.invoke(null,
+                Map.of("type", "remote.Foreign", "message", "remote", "detail", "original remote stack"),
+                Throwable.class, new String[0]);
+            Map<String, Object> forwarded = new LinkedHashMap<>();
+            copy.invoke(null, remote, forwarded, new String[0]);
+            Assert.assertEquals("remote.Foreign", forwarded.get("type"));
+            Assert.assertEquals("original remote stack", forwarded.get("detail"));
+            Assert.assertEquals(1, CustomConverter.detailReads);
+            Throwable restored = (Throwable) restore.invoke(null, Map.of("type", "remote.Custom", "message", "restored"),
+                                                            CustomException.class, new String[0]);
+            Assert.assertTrue(restored instanceof CustomException);
+            Assert.assertEquals("restored", restored.getMessage());
+            for (String invalid : new String[]{"wrongType", "nullResult"}) {
+                InvocationTargetException failure = Assert.assertThrows(InvocationTargetException.class,
+                    () -> restore.invoke(null, Map.of("type", "remote.Custom", invalid, true),
+                                         CustomException.class, new String[0]));
+                Assert.assertTrue(failure.getCause() instanceof UnsupportedOperationException);
+            }
         } finally {
             thread.setContextClassLoader(original);
             try (Stream<Path> files = Files.walk(root)) {
@@ -87,12 +108,12 @@ public class FastBeanCopierExceptionSpiTest {
         }
     }
 
-    public static class CustomConverter extends DefaultExceptionToMapConverter {
+    public static class CustomConverter extends DefaultExceptionConverter {
         static int detailReads;
 
         @Override
-        public void convert(Throwable source, BiConsumer<String, Supplier<?>> properties) {
-            super.convert(source, properties);
+        public void toMap(Throwable source, BiConsumer<String, Supplier<?>> properties) {
+            super.toMap(source, properties);
             properties.accept("extra", () -> "custom");
         }
 
@@ -100,6 +121,26 @@ public class FastBeanCopierExceptionSpiTest {
         protected String getDetail(Throwable source) {
             detailReads++;
             return "compact:" + source.getMessage();
+        }
+
+        @Override
+        public Throwable fromMap(Map<String, ?> source, Class<? extends Throwable> targetType) {
+            if (source.containsKey("wrongType")) {
+                return new AssertionError("wrong type");
+            }
+            if (source.containsKey("nullResult")) {
+                return null;
+            }
+            if (targetType == CustomException.class) {
+                return new CustomException((String) source.get("message"));
+            }
+            return super.fromMap(source, targetType);
+        }
+    }
+
+    public static class CustomException extends RuntimeException {
+        public CustomException(String message) {
+            super(message);
         }
     }
 }

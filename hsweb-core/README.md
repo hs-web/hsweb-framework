@@ -33,9 +33,15 @@ Bean/record 转 Map 时排除 `transient` 字段（包含继承字段）及 Java
 
 直接将 Throwable 转 Map（包括 `DEFAULT_CONVERT.convert(error, Map.class, ...)`）使用固定描述字段：`type` 为完整类名，`message` 为异常消息，`detail` 为含 cause/suppressed 的完整堆栈文本；`I18nSupportException` 另提供 `i18nCode`、`args`，`BusinessException` 另提供业务 `code`、`status`。参数保持浅复制及原类型；空值跳过，不再枚举异常的其他 getter 或携带原始 cause/suppressed/stackTrace 对象。include/ignore 在取值前应用，排除 detail 时不生成堆栈，值转换仍使用调用方的 Converter。Map 用于错误描述，异常的真实类型还原不依赖类名反射实例化。
 
-可在 `META-INF/services/org.hswebframework.web.bean.ExceptionToMapConverter` 注册自定义异常映射实现。首次异常转换时使用线程上下文 ClassLoader 发现的首个实现，每个运行环境应只注册一个；无实现时回退 `DefaultExceptionToMapConverter`。实例按 copier 的 ClassLoader 复用，自定义实现应无状态或线程安全。SPI 按字段提供延迟 Supplier，由 copier 统一过滤、读取及转换；继承默认实现并覆盖 `getDetail(Throwable)` 可复用上层平台的栈精简逻辑，自定义栈处理需保留循环引用处理，无需改变其他字段或引入反向依赖。
+目标声明为 Throwable 体系时，兼容的现成异常直接保留原引用；异常描述 Map 通过 `ExceptionConverter.fromMap` 受控恢复。默认实现要求非空字符串 type；识别 hsweb-core 中 I18nSupportException、BusinessException、NotFoundException、ValidationException 及其 NoStackTrace 类名，恢复为相应 NoStackTrace 实现。未知类型使用 `RemoteException`（BusinessException.NoStackTrace 子类）安全包装；通过 `RemoteExceptionMetadata` 保留远端 type/detail、发送端 message、国际化及业务字段，不按 type 任意加载类或解析 detail。恢复结果必须可赋值给目标声明；其余具体异常或 Error 声明需由 SPI 提供对应结果，否则明确报错。Object/Map 目标不因存在 type 字段而主动恢复。
 
-访问器回归由 `FastBeanCopierBeanTest`、`FastBeanCopierReadOnlyTest`、`FastBeanCopierReadOnceTest`、`FastBeanCopierTransientTest` 和 `FastBeanCopierTest` 覆盖，包括只读源属性、单次取值、导出排除规则、目标可写边界、不同访问器风格、继承泛型、忽略属性、record、全局配置隔离及静态访问器排除。`FastBeanCopierExceptionTest` 与 `FastBeanCopierExceptionSpiTest` 覆盖异常描述、循环 cause、国际化字段、值转换和 SPI 发现及延迟取值。
+ValidationException 的 details 以 property/message/detail 字段 Map 列表导出，恢复时保留字段错误及详情；details 中的业务值保持浅复制。已知异常固定的业务 code/status 若与描述冲突会明确拒绝，不静默丢失。鉴权等上层模块的异常由其 SPI 实现扩展，hsweb-core 不反向依赖这些模块。
+
+还原支持本地 Object[] 与 JSON List 形式的 args，复制参数容器并保留参数值类型；status 必须是 int 范围内的整数。接收端无对应译文时使用发送端 message 回退。恢复后的异常再次转 Map 时沿用原远端 type/detail，不生成本地替代栈；缺省字段保持缺省。`copy(map, Throwable.class)` 与 `copy(map, existingThrowable)` 采用同一恢复路径，后者返回新异常，调用方必须使用返回值；复制到普通 Bean/record 的异常字段也使用该转换规则。
+
+可在 `META-INF/services/org.hswebframework.web.bean.ExceptionConverter` 注册自定义双向实现（`toMap` / `fromMap`）。首次异常转换时使用线程上下文 ClassLoader 发现的首个实现，每个运行环境应只注册一个；无实现时回退 `DefaultExceptionConverter`。实例按 copier 的 ClassLoader 复用，自定义实现应无状态或线程安全。toMap 按字段提供延迟 Supplier，由 copier 统一过滤、读取及转换；继承默认实现并覆盖 `getDetail(Throwable)` 可精简原始异常的栈，自定义栈处理需保留循环引用处理。携带 RemoteExceptionMetadata 的异常直接沿用远端 detail，不再调用此栈渲染方法。fromMap 应返回与目标声明兼容的异常，copier 拒绝 null 或不兼容的 SPI 返回值。
+
+访问器回归由 `FastBeanCopierBeanTest`、`FastBeanCopierReadOnlyTest`、`FastBeanCopierReadOnceTest`、`FastBeanCopierTransientTest` 和 `FastBeanCopierTest` 覆盖，包括只读源属性、单次取值、导出排除规则、目标可写边界、不同访问器风格、继承泛型、忽略属性、record、全局配置隔离及静态访问器排除。`FastBeanCopierExceptionTest`、`FastBeanCopierExceptionRestoreTest`、`FastBeanCopierExceptionSpiTest` 及 `RemoteExceptionI18nTest` 覆盖异常描述、循环 cause、受控还原、JSON 往返、国际化回退和重译、值转换及双向 SPI 发现。
 
 约定: 如果属性类实现了`Cloneable`接口,在复制的时候将调用`clone`方法.所以如果你实现了`Cloneable`接口,就必须重写`clone`方法并且为`public`修饰的.
 
