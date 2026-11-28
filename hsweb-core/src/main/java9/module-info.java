@@ -5,6 +5,7 @@ module hsweb.core{
     requires com.google.common;
     requires reactor.core;
     requires fastjson;
+    requires json.facade.api;
     requires spring.beans;
     requires spring.core;
     requires java.desktop;
